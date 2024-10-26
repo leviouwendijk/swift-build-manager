@@ -99,8 +99,6 @@ func setupSBMBinDirectory() -> String {
         }
     }
 
-    print("")
-
     let shellConfigPath = homeDirectory.appendingPathComponent(".zshrc").path  // Adjust for bash if needed
     let exportPathLine = "export PATH=\"$HOME/sbm-bin:$PATH\"\n"
     
