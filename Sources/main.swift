@@ -126,6 +126,18 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
         }
     } catch {
         print("Error: Failed to replace binary at \(destinationPath): \(error)")
+        return
+    }
+    
+    // Step 4: Create metadata file with project root information
+    let metadataPath = destinationURL.deletingLastPathComponent().appendingPathComponent("\(targetName).metadata")
+    let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
+    
+    do {
+        try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
+        print("Metadata file created at \(metadataPath.path)")
+    } catch {
+        print("Error: Failed to write metadata file: \(error)")
     }
 }
 
