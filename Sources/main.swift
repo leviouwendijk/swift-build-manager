@@ -89,18 +89,18 @@ func setupSBMBinDirectory() -> String {
     let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
     let sbmBinPath = homeDirectory.appendingPathComponent("sbm-bin").path
 
-    // Step 1: Create sbm-bin if it doesn't exist
     if !FileManager.default.fileExists(atPath: sbmBinPath) {
         do {
             try FileManager.default.createDirectory(atPath: sbmBinPath, withIntermediateDirectories: true, attributes: nil)
             print("Created sbm-bin directory at \(sbmBinPath)")
         } catch {
-            print("Error: Could not create sbm-bin directory: \(error)")
+            print("Error: Could not create sbm-bin directory: \(error)".ansi(.red))
             exit(1)
         }
     }
 
-    // Step 2: Check if sbm-bin is in PATH, and add it if not
+    print("")
+
     let shellConfigPath = homeDirectory.appendingPathComponent(".zshrc").path  // Adjust for bash if needed
     let exportPathLine = "export PATH=\"$HOME/sbm-bin:$PATH\"\n"
     
@@ -121,7 +121,7 @@ func setupSBMBinDirectory() -> String {
                 print("Added sbm-bin to PATH in \(shellConfigPath)")
                 print("Please run 'source ~/.zshrc' to update your PATH or restart your terminal.")
             } catch {
-                print("Error: Could not modify \(shellConfigPath): \(error)")
+                print("Error: Could not modify \(shellConfigPath): \(error)".ansi(.red))
                 exit(1)
             }
         }
@@ -134,7 +134,7 @@ func setupSBMBinDirectory() -> String {
 func getTargetName(from directory: String) -> String? {
     let packageSwiftPath = URL(fileURLWithPath: directory).appendingPathComponent("Package.swift").path
     guard let packageContents = try? String(contentsOfFile: packageSwiftPath) else {
-        print("Error: Could not read Package.swift.")
+        print("Error: Could not read Package.swift.".ansi(.red))
         return nil
     }
     
@@ -146,7 +146,7 @@ func getTargetName(from directory: String) -> String? {
         }
     }
     
-    print("Error: Could not locate a target name in Package.swift.")
+    print("Error: Could not locate a target name in Package.swift.".ansi(.red))
     return nil
 }
 
