@@ -149,13 +149,15 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
     
     // Step 3: Replace the binary at the destination path
+    var binaryExists: Bool = false
     do {
         if FileManager.default.fileExists(atPath: destinationURL.path) {
-            print("Warning: \(destinationURL.path) already exists. Replacing it.")
+            binaryExists = true
+            print("\(destinationURL.path) already exists. Replacing it...")
         }
         
         if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
-            print("Binary replaced at \(replacedURL.path)")
+            print("Binary " + ( binaryExists ? "re" : "" ) + "placed at \(replacedURL.path)")
         } else {
             print("Binary replaced, but no new URL was returned.")
         }
