@@ -181,7 +181,7 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
         }
         
         if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
-            print("Binary ".ansi(.brightBlack) + ( binaryExists ? "re".ansi(.brightBlack) : "" ) + "placed at \(replacedURL.path)".ansi(.bold, .brightBlack))
+            print("Binary ".ansi(.brightBlack) + ( binaryExists ? "re".ansi(.brightBlack) : "" ) + "placed at ".ansi(.brightBlack) + "\(replacedURL.path)".ansi(.bold, .brightBlack))
             binaryPlaced = true
         } else {
             print("Binary replaced, but no new URL was returned.".ansi(.brightBlack))
