@@ -18,7 +18,7 @@ enum BuildType: String {
 
 // Utility to run shell commands
 @discardableResult
-func runShellCommand(_ command: String, in directory: String) -> Bool {
+func runShellCommand(_ command: String, in directory: String = FileManager.default.currentDirectoryPath) -> Bool {
     let task = Process()
     task.launchPath = "/bin/bash"
     task.arguments = ["-c", command]
@@ -27,6 +27,51 @@ func runShellCommand(_ command: String, in directory: String) -> Bool {
     task.waitUntilExit()
     
     return task.terminationStatus == 0
+}
+
+func setupSBMBinDirectory() -> String {
+    let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
+    let sbmBinPath = homeDirectory.appendingPathComponent("sbm-bin").path
+
+    // Step 1: Create sbm-bin if it doesn't exist
+    if !FileManager.default.fileExists(atPath: sbmBinPath) {
+        do {
+            try FileManager.default.createDirectory(atPath: sbmBinPath, withIntermediateDirectories: true, attributes: nil)
+            print("Created sbm-bin directory at \(sbmBinPath)")
+        } catch {
+            print("Error: Could not create sbm-bin directory: \(error)")
+            exit(1)
+        }
+    }
+
+    // Step 2: Check if sbm-bin is in PATH, and add it if not
+    let shellConfigPath = homeDirectory.appendingPathComponent(".zshrc").path  // Adjust for bash if needed
+    let exportPathLine = "export PATH=\"$HOME/sbm-bin:$PATH\"\n"
+    
+    if let shellConfigContents = try? String(contentsOfFile: shellConfigPath), !shellConfigContents.contains(exportPathLine) {
+        // Open the file for appending and write the export line
+        if let fileHandle = FileHandle(forWritingAtPath: shellConfigPath) {
+            fileHandle.seekToEndOfFile()
+            if let data = exportPathLine.data(using: .utf8) {
+                fileHandle.write(data)
+                print("Added sbm-bin to PATH in \(shellConfigPath)")
+                print("Please run 'source ~/.zshrc' to update your PATH or restart your terminal.")
+            }
+            fileHandle.closeFile()
+        } else {
+            // If unable to open, fallback to simple file append
+            do {
+                try exportPathLine.write(toFile: shellConfigPath, atomically: true, encoding: .utf8)
+                print("Added sbm-bin to PATH in \(shellConfigPath)")
+                print("Please run 'source ~/.zshrc' to update your PATH or restart your terminal.")
+            } catch {
+                print("Error: Could not modify \(shellConfigPath): \(error)")
+                exit(1)
+            }
+        }
+    }
+    
+    return sbmBinPath
 }
 
 // Locate the binary target name from Package.swift
@@ -68,8 +113,14 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     let sourcePath = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath).path
     
     // Step 3: Copy the binary to the destination path
+    let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
+    
+    // Check if the destination binary already exists
+    if FileManager.default.fileExists(atPath: destinationURL.path) {
+        print("Warning: \(destinationURL.path) already exists. Overwriting.")
+    }
+    
     do {
-        let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
         try FileManager.default.copyItem(atPath: sourcePath, toPath: destinationURL.path)
         print("Binary copied to \(destinationURL.path)")
     } catch {
@@ -81,9 +132,8 @@ func main() {
     // Main execution
     let arguments = CommandLine.arguments
 
-    // Check and parse build type
     guard arguments.count >= 2 else {
-        print("Usage: sbm -d|-r [project-directory] [destination-path (optional, defaults to /usr/local/bin)]")
+        print("Usage: sbm -d|-r [project-directory] [destination-path (optional)]")
         exit(1)
     }
 
@@ -94,10 +144,12 @@ func main() {
 
     // Determine the project directory and destination path
     let projectDirectory = arguments.count > 2 && arguments[2].first != "-" ? arguments[2] : FileManager.default.currentDirectoryPath
-    let destinationPath = arguments.count > 3 || (arguments.count > 2 && arguments[2].first == "-") ? arguments.last! : "/usr/local/bin"
+    let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
 
     buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
 }
+
+main()
 
 // sbm -d|-r (defaults)
 // sbm -d|-r /project/path (specifying another argument will be assumed as project)
