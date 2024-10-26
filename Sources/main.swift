@@ -160,7 +160,7 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
     print("") 
 
-    print("Moving binary to " + "sbm-bin".ansi(.brightBlack, .bold) + "...")
+    print("Moving binary to " + "sbm-bin".ansi(.italic) + "...")
     let projectFolderName = URL(fileURLWithPath: targetDirectory).lastPathComponent
     guard let targetName = getTargetName(from: targetDirectory) else {
         print("Error: Could not determine target name.".ansi(.red))
@@ -205,10 +205,13 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
     print("")
 
-    let successOut = "You can now run ".ansi(.brightBlack) + "\(projectFolderName) ".ansi(.brightBlack, .bold) + "using ".ansi(.brightBlack) + "\(targetName)".ansi(.bold)
+    let successOut = "\(targetName) ".ansi(.bold) + "is now an executable binary for " + "\(projectFolderName)".ansi(.italic)
+    let successOutSpaced = """
+            \(successOut)
+        """
     let errorOut = "Failed to move \(targetName) binary to sbm-bin, retrace steps.".ansi(.red)
 
-    binaryPlaced ? print(successOut) : print(errorOut)
+    binaryPlaced ? print(successOutSpaced) : print(errorOut)
 
 }
 
