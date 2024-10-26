@@ -58,8 +58,29 @@ func runShellCommand(_ command: String, in directory: String = FileManager.defau
     task.launchPath = "/bin/bash"
     task.arguments = ["-c", command]
     task.currentDirectoryPath = directory
+    
+    let outputPipe = Pipe()
+    task.standardOutput = outputPipe
+    task.standardError = outputPipe
+    
+    let outputHandle = outputPipe.fileHandleForReading
+    outputHandle.readabilityHandler = { fileHandle in
+        // Read data as it becomes available
+        let data = fileHandle.availableData
+        if let output = String(data: data, encoding: .utf8)?.ansi(.brightBlack) {
+            let colorizedOutput = output
+                .replacingOccurrences(of: "production", with: "production".ansi(.bold))
+                .replacingOccurrences(of: "debugging", with: "debugging".ansi(.bold))
+                .replacingOccurrences(of: "error", with: "error".ansi(.red))
+                .replacingOccurrences(of: "Build complete!", with: "Build complete!".ansi(.green))
+                .replacingOccurrences(of: "warning", with: "warning".ansi(.yellow))
+            print(colorizedOutput, terminator: "")
+        }
+    }
+    
     task.launch()
     task.waitUntilExit()
+    outputHandle.readabilityHandler = nil  // Remove the handler after the task exits
     
     return task.terminationStatus == 0
 }
@@ -130,17 +151,19 @@ func getTargetName(from directory: String) -> String? {
 }
 
 func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPath: String) {
-    // Step 1: Build the project
     let buildCommand = buildType == .debug ? "swift build -c debug" : "swift build -c release"
     print("Building project...")
     guard runShellCommand(buildCommand, in: targetDirectory) else {
-        print("Error: Build failed.")
+        print("Error: Build failed.".ansi(.red))
         return
     }
-    
-    // Step 2: Locate the binary
+
+    print("") 
+
+    print("Moving binary to " + "sbm-bin".ansi(.brightBlack, .bold) + "...")
+    let projectFolderName = URL(fileURLWithPath: targetDirectory).lastPathComponent
     guard let targetName = getTargetName(from: targetDirectory) else {
-        print("Error: Could not determine target name.")
+        print("Error: Could not determine target name.".ansi(.red))
         return
     }
     
@@ -150,19 +173,21 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     
     // Step 3: Replace the binary at the destination path
     var binaryExists: Bool = false
+    var binaryPlaced: Bool = false
     do {
         if FileManager.default.fileExists(atPath: destinationURL.path) {
             binaryExists = true
-            print("\(destinationURL.path) already exists. Replacing it...")
+            print("\(destinationURL.path)".ansi(.brightBlack, .bold) + " already exists. Replacing it...".ansi(.brightBlack))
         }
         
         if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
-            print("Binary " + ( binaryExists ? "re" : "" ) + "placed at \(replacedURL.path)")
+            print("Binary ".ansi(.brightBlack) + ( binaryExists ? "re".ansi(.brightBlack) : "" ) + "placed at \(replacedURL.path)".ansi(.bold, .brightBlack))
+            binaryPlaced = true
         } else {
-            print("Binary replaced, but no new URL was returned.")
+            print("Binary replaced, but no new URL was returned.".ansi(.brightBlack))
         }
     } catch {
-        print("Error: Failed to replace binary at \(destinationPath): \(error)")
+        print("Error: Failed to replace binary at ".ansi(.brightBlack) + "\(destinationPath.ansi(.brightBlack, .bold)): \(error)".ansi(.red))
         return
     }
     
@@ -172,14 +197,23 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     
     do {
         try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
-        print("Metadata file created at \(metadataPath.path)")
+        print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
     } catch {
-        print("Error: Failed to write metadata file: \(error)")
+        print("Error: Failed to write metadata file: \(error)".ansi(.red))
+        print("Ensure metadata is properly written! This ensures project root path is accessible to updates.".ansi(.red))
     }
+
+    print("")
+
+    let successOut = "You can now run ".ansi(.brightBlack) + "\(projectFolderName) ".ansi(.brightBlack, .bold) + "using ".ansi(.brightBlack) + "\(targetName)".ansi(.bold)
+    let errorOut = "Failed to move \(targetName) binary to sbm-bin, retrace steps.".ansi(.red)
+
+    binaryPlaced ? print(successOut) : print(errorOut)
+
 }
 
 func main() {
-    // Main execution
+    print("")
     let arguments = CommandLine.arguments
 
     guard arguments.count >= 2 else {
@@ -197,6 +231,7 @@ func main() {
     let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
 
     buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
+    print("")
 }
 
 main()
