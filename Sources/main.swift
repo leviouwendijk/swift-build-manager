@@ -110,21 +110,22 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     }
     
     let buildPath = buildType == .debug ? ".build/debug/\(targetName)" : ".build/release/\(targetName)"
-    let sourcePath = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath).path
-    
-    // Step 3: Copy the binary to the destination path
+    let sourceURL = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath)
     let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
     
-    // Check if the destination binary already exists
-    if FileManager.default.fileExists(atPath: destinationURL.path) {
-        print("Warning: \(destinationURL.path) already exists. Overwriting.")
-    }
-    
+    // Step 3: Replace the binary at the destination path
     do {
-        try FileManager.default.copyItem(atPath: sourcePath, toPath: destinationURL.path)
-        print("Binary copied to \(destinationURL.path)")
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            print("Warning: \(destinationURL.path) already exists. Replacing it.")
+        }
+        
+        if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
+            print("Binary replaced at \(replacedURL.path)")
+        } else {
+            print("Binary replaced, but no new URL was returned.")
+        }
     } catch {
-        print("Error: Failed to copy binary to \(destinationPath): \(error)")
+        print("Error: Failed to replace binary at \(destinationPath): \(error)")
     }
 }
 
