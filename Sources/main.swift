@@ -128,7 +128,7 @@ func setupSBMBinDirectory() -> String {
     return sbmBinPath
 }
 
-// Locate the binary target name from Package.swift
+// Locate the executable target name from Package.swift based on package name or first available target
 func getTargetName(from directory: String) -> String? {
     let packageSwiftPath = URL(fileURLWithPath: directory).appendingPathComponent("Package.swift").path
     guard let packageContents = try? String(contentsOfFile: packageSwiftPath) else {
@@ -136,15 +136,31 @@ func getTargetName(from directory: String) -> String? {
         return nil
     }
     
-    // A simple regex to find the first target name in Package.swift
-    let targetNameRegex = try! NSRegularExpression(pattern: #"name:\s*"(\w+)""#, options: [])
-    if let match = targetNameRegex.firstMatch(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.count)) {
-        if let targetRange = Range(match.range(at: 1), in: packageContents) {
-            return String(packageContents[targetRange])
+    // Capture the package name
+    let packageNameRegex = try! NSRegularExpression(pattern: #"name:\s*"([^"]+)""#, options: [])
+    var packageName: String?
+    if let packageMatch = packageNameRegex.firstMatch(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)),
+       let nameRange = Range(packageMatch.range(at: 1), in: packageContents) {
+        packageName = String(packageContents[nameRange])
+    }
+
+    // Capture executable target names
+    let targetNameRegex = try! NSRegularExpression(pattern: #"executableTarget\s*\(\s*name:\s*"([^"]+)""#, options: [])
+    var targetNames: [String] = []
+    targetNameRegex.enumerateMatches(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)) { match, _, _ in
+        if let match = match, let targetRange = Range(match.range(at: 1), in: packageContents) {
+            targetNames.append(String(packageContents[targetRange]))
         }
     }
+
+    // Return target matching package name or the first executable target
+    if let packageName = packageName, targetNames.contains(packageName) {
+        return packageName
+    } else if !targetNames.isEmpty {
+        return targetNames.first
+    }
     
-    print("Error: Could not locate a target name in Package.swift.".ansi(.red))
+    print("Error: Could not locate an executable target in Package.swift.".ansi(.red))
     return nil
 }
 
