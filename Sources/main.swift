@@ -213,25 +213,88 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
 }
 
+enum Alignment {
+    case left
+    case right
+}
+
+protocol Alignable {
+    func align(_ side: Alignment,_ width: Int) -> String
+}
+
+extension String: Alignable {
+    func align(_ side: Alignment,_ width: Int) -> String {
+        let padding = max(0, width - self.count)
+
+        switch side {
+        case .left:
+            let paddedText = self + String(repeating: ".", count: padding)
+            return paddedText
+        case .right:
+            let paddedText = String(repeating: ".", count: padding) + self
+            return paddedText
+        }
+    }
+}
+
+struct Subcommand {
+    let command: String
+    let details: String
+}
+
+let commandWidth = 40
+let detailsWidth = 60
+
+extension Subcommand: CustomStringConvertible {
+    var description: String {
+        command.align(.left, commandWidth) + details.align(.right, detailsWidth) 
+    }
+}
+
+let availableCommands: [Subcommand] = [
+    Subcommand(command: "sbm -r", details: "Builds in release mode, places binary in '~/sbm-bin'"),
+    Subcommand(command: "sbm -d", details: "Builds in debug mode, places binary in '~/sbm-bin'"),
+    Subcommand(command: "sbm -r /project/path", details: "Builds release for specific project path"),
+    Subcommand(command: "sbm -d /project/path", details: "Builds debug for specific project path"),
+    Subcommand(command: "sbm -r /project/path /destination/path", details: "Places release build in destination"),
+    Subcommand(command: "sbm -d /project/path /destination/path", details: "Places debug build in destination"),
+    // Subcommand(command: "-setup", details: "Creates sbm-bin directory if not exists"), -- isolate setup to separate func?
+    Subcommand(command: "-h, -help", details: "Lists available commands and usage")
+]
+
+func showAvailableCommands() {
+    for command in availableCommands {
+        print(command)
+    }
+}
+
+
 func main() {
     print("")
     let arguments = CommandLine.arguments
+    let firstArg = arguments.count >= 2 ? arguments[1] : ""
 
-    guard arguments.count >= 2 else {
-        print("Usage: sbm -d|-r [project-directory] [destination-path (optional)]")
-        exit(1)
+    switch firstArg { 
+        case "-h", "-help":
+        showAvailableCommands()
+        
+        default: 
+            guard arguments.count >= 2 else {
+                print("Usage: sbm -d|-r [project-directory] [destination-path (optional)]")
+                exit(1)
+            }
+
+            guard let buildType = BuildType.fromArgument(arguments[1]) else {
+                print("Invalid build type. Use -d|-debug for debug or -r|-release for release.")
+                exit(1)
+            }
+
+            // Determine the project directory and destination path
+            let projectDirectory = arguments.count > 2 && arguments[2].first != "-" ? arguments[2] : FileManager.default.currentDirectoryPath
+            let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
+
+            buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
     }
-
-    guard let buildType = BuildType.fromArgument(arguments[1]) else {
-        print("Invalid build type. Use -d|-debug for debug or -r|-release for release.")
-        exit(1)
-    }
-
-    // Determine the project directory and destination path
-    let projectDirectory = arguments.count > 2 && arguments[2].first != "-" ? arguments[2] : FileManager.default.currentDirectoryPath
-    let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
-
-    buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
     print("")
 }
 
