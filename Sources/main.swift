@@ -1,40 +1,5 @@
 import Foundation
 
-enum ANSIColor: String {
-    case reset = "\u{001B}[0m"
-    case bold = "\u{001B}[1m"
-    case dim = "\u{001B}[2m"
-    case italic = "\u{001B}[3m"
-    case underline = "\u{001B}[4m"
-    case black = "\u{001B}[30m"
-    case red = "\u{001B}[31m"
-    case green = "\u{001B}[32m"
-    case yellow = "\u{001B}[33m"
-    case blue = "\u{001B}[34m"
-    case magenta = "\u{001B}[35m"
-    case cyan = "\u{001B}[36m"
-    case white = "\u{001B}[37m"
-    case brightBlack = "\u{001B}[90m" // or gray
-    case brightRed = "\u{001B}[91m"
-    case brightGreen = "\u{001B}[92m"
-    case brightYellow = "\u{001B}[93m"
-    case brightBlue = "\u{001B}[94m"
-    case brightMagenta = "\u{001B}[95m"
-    case brightCyan = "\u{001B}[96m"
-    case brightWhite = "\u{001B}[97m"
-}
-
-protocol StringANSIFormattable {
-    func ansi(_ colors: ANSIColor...) -> String
-}
-
-extension String: StringANSIFormattable {
-    func ansi(_ colors: ANSIColor...) -> String {
-        let colorCodes = colors.map { $0.rawValue }.joined()
-        return "\(colorCodes)\(self)\(ANSIColor.reset.rawValue)"
-    }
-}
-
 enum BuildType: String {
     case debug = "-d"
     case release = "-r"
@@ -83,49 +48,6 @@ func runShellCommand(_ command: String, in directory: String = FileManager.defau
     outputHandle.readabilityHandler = nil  // Remove the handler after the task exits
     
     return task.terminationStatus == 0
-}
-
-func setupSBMBinDirectory() -> String {
-    let homeDirectory = FileManager.default.homeDirectoryForCurrentUser
-    let sbmBinPath = homeDirectory.appendingPathComponent("sbm-bin").path
-
-    if !FileManager.default.fileExists(atPath: sbmBinPath) {
-        do {
-            try FileManager.default.createDirectory(atPath: sbmBinPath, withIntermediateDirectories: true, attributes: nil)
-            print("Created sbm-bin directory at \(sbmBinPath)")
-        } catch {
-            print("Error: Could not create sbm-bin directory: \(error)".ansi(.red))
-            exit(1)
-        }
-    }
-
-    let shellConfigPath = homeDirectory.appendingPathComponent(".zshrc").path  // Adjust for bash if needed
-    let exportPathLine = "export PATH=\"$HOME/sbm-bin:$PATH\"\n"
-    
-    if let shellConfigContents = try? String(contentsOfFile: shellConfigPath), !shellConfigContents.contains(exportPathLine) {
-        // Open the file for appending and write the export line
-        if let fileHandle = FileHandle(forWritingAtPath: shellConfigPath) {
-            fileHandle.seekToEndOfFile()
-            if let data = exportPathLine.data(using: .utf8) {
-                fileHandle.write(data)
-                print("Added sbm-bin to PATH in \(shellConfigPath)")
-                print("Please run 'source ~/.zshrc' to update your PATH or restart your terminal.")
-            }
-            fileHandle.closeFile()
-        } else {
-            // If unable to open, fallback to simple file append
-            do {
-                try exportPathLine.write(toFile: shellConfigPath, atomically: true, encoding: .utf8)
-                print("Added sbm-bin to PATH in \(shellConfigPath)")
-                print("Please run 'source ~/.zshrc' to update your PATH or restart your terminal.")
-            } catch {
-                print("Error: Could not modify \(shellConfigPath): \(error)".ansi(.red))
-                exit(1)
-            }
-        }
-    }
-    
-    return sbmBinPath
 }
 
 // Locate the executable target name from Package.swift based on package name or first available target
@@ -229,62 +151,6 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
 }
 
-enum Alignment {
-    case left
-    case right
-}
-
-protocol Alignable {
-    func align(_ side: Alignment,_ width: Int) -> String
-}
-
-extension String: Alignable {
-    func align(_ side: Alignment,_ width: Int) -> String {
-        let padding = max(0, width - self.count)
-
-        switch side {
-        case .left:
-            let paddedText = self + String(repeating: ".", count: padding)
-            return paddedText
-        case .right:
-            let paddedText = String(repeating: ".", count: padding) + self
-            return paddedText
-        }
-    }
-}
-
-struct Subcommand {
-    let command: String
-    let details: String
-}
-
-let commandWidth = 40
-let detailsWidth = 60
-
-extension Subcommand: CustomStringConvertible {
-    var description: String {
-        command.align(.left, commandWidth) + details.align(.right, detailsWidth) 
-    }
-}
-
-let availableCommands: [Subcommand] = [
-    Subcommand(command: "sbm -r", details: "Builds in release mode, places binary in '~/sbm-bin'"),
-    Subcommand(command: "sbm -d", details: "Builds in debug mode, places binary in '~/sbm-bin'"),
-    Subcommand(command: "sbm -r /project/path", details: "Builds release for specific project path"),
-    Subcommand(command: "sbm -d /project/path", details: "Builds debug for specific project path"),
-    Subcommand(command: "sbm -r /project/path /destination/path", details: "Places release build in destination"),
-    Subcommand(command: "sbm -d /project/path /destination/path", details: "Places debug build in destination"),
-    // Subcommand(command: "-setup", details: "Creates sbm-bin directory if not exists"), -- isolate setup to separate func?
-    Subcommand(command: "-h, -help", details: "Lists available commands and usage")
-]
-
-func showAvailableCommands() {
-    for command in availableCommands {
-        print(command)
-    }
-}
-
-
 func main() {
     print("")
     let arguments = CommandLine.arguments
@@ -315,11 +181,5 @@ func main() {
 }
 
 main()
-
-// sbm -d|-r (defaults)
-// sbm -d|-r /project/path (specifying another argument will be assumed as project)
-// sbm -d|-r /project/path /destination/path (specifying yet another arg will be placed as destination for binaries)
-
-
 
 
