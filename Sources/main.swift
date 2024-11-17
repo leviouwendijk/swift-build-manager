@@ -51,7 +51,7 @@ func runShellCommand(_ command: String, in directory: String = FileManager.defau
 }
 
 // Locate the executable target name from Package.swift based on package name or first available target
-func getTargetName(from directory: String) -> String? {
+func getTargetNames(from directory: String) -> [String]? {
     let packageSwiftPath = URL(fileURLWithPath: directory).appendingPathComponent("Package.swift").path
     guard let packageContents = try? String(contentsOfFile: packageSwiftPath) else {
         print("Error: Could not read Package.swift.".ansi(.red))
@@ -65,6 +65,7 @@ func getTargetName(from directory: String) -> String? {
        let nameRange = Range(packageMatch.range(at: 1), in: packageContents) {
         packageName = String(packageContents[nameRange])
     }
+    print("Package identifier: ".ansi(.brightBlack) + "\(packageName ?? "nil")".ansi(.brightBlack, .bold))
 
     // Capture executable target names
     let targetNameRegex = try! NSRegularExpression(pattern: #"executableTarget\s*\(\s*name:\s*"([^"]+)""#, options: [])
@@ -75,15 +76,12 @@ func getTargetName(from directory: String) -> String? {
         }
     }
 
-    // Return target matching package name or the first executable target
-    if let packageName = packageName, targetNames.contains(packageName) {
-        return packageName
-    } else if !targetNames.isEmpty {
-        return targetNames.first
+    if targetNames.isEmpty {
+        print("Error: No executable targets found in Package.swift.".ansi(.red))
+        return nil
     }
-    
-    print("Error: Could not locate an executable target in Package.swift.".ansi(.red))
-    return nil
+
+    return targetNames
 }
 
 func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPath: String) {
@@ -98,57 +96,59 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
     print("Moving binary to " + "sbm-bin".ansi(.italic) + "...")
     let projectFolderName = URL(fileURLWithPath: targetDirectory).lastPathComponent
-    guard let targetName = getTargetName(from: targetDirectory) else {
-        print("Error: Could not determine target name.".ansi(.red))
+    guard let targetNames = getTargetNames(from: targetDirectory) else {
+        print("Error: Could not determine executable target names.".ansi(.red))
         return
     }
     
-    let buildPath = buildType == .debug ? ".build/debug/\(targetName)" : ".build/release/\(targetName)"
-    let sourceURL = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath)
-    let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
-    
-    // Step 3: Replace the binary at the destination path
-    var binaryExists: Bool = false
-    var binaryPlaced: Bool = false
-    do {
-        if FileManager.default.fileExists(atPath: destinationURL.path) {
-            binaryExists = true
-            print("\(destinationURL.path)".ansi(.brightBlack, .bold) + " already exists. Replacing it...".ansi(.brightBlack))
+    for targetName in targetNames {
+        print("")
+        let buildPath = buildType == .debug ? ".build/debug/\(targetName)" : ".build/release/\(targetName)"
+        let sourceURL = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath)
+        let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
+        
+        // Step 3: Replace the binary at the destination path
+        var binaryExists: Bool = false
+        var binaryPlaced: Bool = false
+        do {
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                binaryExists = true
+                print("\(destinationURL.path)".ansi(.brightBlack, .bold) + " already exists. Replacing it...".ansi(.brightBlack))
+            }
+            
+            if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
+                print("Binary ".ansi(.brightBlack) + ( binaryExists ? "re".ansi(.brightBlack) : "" ) + "placed at ".ansi(.brightBlack) + "\(replacedURL.path)".ansi(.bold, .brightBlack))
+                binaryPlaced = true
+            } else {
+                print("Binary replaced, but no new URL was returned.".ansi(.brightBlack))
+            }
+        } catch {
+            print("Error: Failed to replace binary at ".ansi(.brightBlack) + "\(destinationPath.ansi(.brightBlack, .bold)): \(error)".ansi(.red))
+            return
         }
         
-        if let replacedURL = try FileManager.default.replaceItemAt(destinationURL, withItemAt: sourceURL) {
-            print("Binary ".ansi(.brightBlack) + ( binaryExists ? "re".ansi(.brightBlack) : "" ) + "placed at ".ansi(.brightBlack) + "\(replacedURL.path)".ansi(.bold, .brightBlack))
-            binaryPlaced = true
-        } else {
-            print("Binary replaced, but no new URL was returned.".ansi(.brightBlack))
+        // Step 4: Create metadata file with project root information
+        let metadataPath = destinationURL.deletingLastPathComponent().appendingPathComponent("\(targetName).metadata")
+        let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
+        
+        do {
+            try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
+            print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
+        } catch {
+            print("Error: Failed to write metadata file: \(error)".ansi(.red))
+            print("Ensure metadata is properly written! This ensures project root path is accessible to updates.".ansi(.red))
         }
-    } catch {
-        print("Error: Failed to replace binary at ".ansi(.brightBlack) + "\(destinationPath.ansi(.brightBlack, .bold)): \(error)".ansi(.red))
-        return
+
+        print("")
+
+        let successOut = "\(targetName) ".ansi(.bold) + "is now an executable binary for " + "\(projectFolderName)".ansi(.italic)
+        let successOutSpaced = """
+                \(successOut)
+            """
+        let errorOut = "Failed to move \(targetName) binary to sbm-bin, retrace steps.".ansi(.red)
+
+        binaryPlaced ? print(successOutSpaced) : print(errorOut)
     }
-    
-    // Step 4: Create metadata file with project root information
-    let metadataPath = destinationURL.deletingLastPathComponent().appendingPathComponent("\(targetName).metadata")
-    let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
-    
-    do {
-        try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
-        print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
-    } catch {
-        print("Error: Failed to write metadata file: \(error)".ansi(.red))
-        print("Ensure metadata is properly written! This ensures project root path is accessible to updates.".ansi(.red))
-    }
-
-    print("")
-
-    let successOut = "\(targetName) ".ansi(.bold) + "is now an executable binary for " + "\(projectFolderName)".ansi(.italic)
-    let successOutSpaced = """
-            \(successOut)
-        """
-    let errorOut = "Failed to move \(targetName) binary to sbm-bin, retrace steps.".ansi(.red)
-
-    binaryPlaced ? print(successOutSpaced) : print(errorOut)
-
 }
 
 func main() {
