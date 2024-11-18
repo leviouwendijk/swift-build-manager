@@ -84,6 +84,49 @@ func getTargetNames(from directory: String) -> [String]? {
     return targetNames
 }
 
+func removeBinaryAndMetadata(for targetDirectory: String, in destinationPath: String) {
+    guard let targetNames = getTargetNames(from: targetDirectory) else {
+        print("Error: Could not determine executable target names.".ansi(.red))
+        return
+    }
+    
+    for targetName in targetNames {
+        let binaryPath = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
+        let metadataPath = binaryPath.deletingLastPathComponent().appendingPathComponent("\(targetName).metadata")
+        
+        do {
+            // Remove the binary
+            if FileManager.default.fileExists(atPath: binaryPath.path) {
+                try FileManager.default.removeItem(at: binaryPath)
+                print("Removed binary: \(binaryPath.path)".ansi(.brightBlack, .bold))
+            } else {
+                print("Binary not found: \(binaryPath.path)".ansi(.yellow))
+            }
+            
+            // Remove the metadata file
+            if FileManager.default.fileExists(atPath: metadataPath.path) {
+                try FileManager.default.removeItem(at: metadataPath)
+                print("Removed metadata: \(metadataPath.path)".ansi(.brightBlack, .bold))
+            } else {
+                print("Metadata file not found: \(metadataPath.path)".ansi(.yellow))
+            }
+        } catch {
+            print("Error: Failed to remove binary or metadata file: \(error)".ansi(.red))
+        }
+    }
+}
+
+func buildWithoutDeploy(targetDirectory: String, buildType: BuildType) {
+    let buildCommand = buildType == .debug ? "swift build -c debug" : "swift build -c release"
+    print("Building project locally...")
+    guard runShellCommand(buildCommand, in: targetDirectory) else {
+        print("Error: Build failed.".ansi(.red))
+        return
+    }
+    print("")
+    print("Build complete. Binary kept in project directory, and not moved to sbm-bin.".ansi(.green))
+}
+
 func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPath: String) {
     let buildCommand = buildType == .debug ? "swift build -c debug" : "swift build -c release"
     print("Building project...")
@@ -159,6 +202,11 @@ func main() {
     switch firstArg { 
         case "-h", "-help":
         showAvailableCommands()
+
+        case "-rm":
+        let projectDirectory = arguments.count > 2 ? arguments[2] : FileManager.default.currentDirectoryPath
+        let destinationPath = setupSBMBinDirectory()
+        removeBinaryAndMetadata(for: projectDirectory, in: destinationPath)
         
         default: 
             guard arguments.count >= 2 else {
@@ -171,11 +219,17 @@ func main() {
                 exit(1)
             }
 
+            let isLocalBuild = arguments.contains("-l") || arguments.contains("-local")
+            
             // Determine the project directory and destination path
             let projectDirectory = arguments.count > 2 && arguments[2].first != "-" ? arguments[2] : FileManager.default.currentDirectoryPath
             let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
 
-            buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
+            if isLocalBuild {
+                buildWithoutDeploy(targetDirectory: projectDirectory, buildType: buildType)
+            } else {
+                buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
+            }
     }
     print("")
 }
