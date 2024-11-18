@@ -194,6 +194,21 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     }
 }
 
+func cleanBuild(for targetDirectory: String) {
+    let cleanCommand = "swift package clean"
+    print("Cleaning build artifacts in project directory: \(targetDirectory)".ansi(.brightBlack))
+    
+    guard runShellCommand(cleanCommand, in: targetDirectory) else {
+        print("")
+        print("Error: Failed to clean build artifacts.".ansi(.red))
+        return
+    }
+
+    print("")
+    
+    print("Clean successful!".ansi(.green))
+}
+
 func main() {
     print("")
     let arguments = CommandLine.arguments
@@ -207,6 +222,10 @@ func main() {
         let projectDirectory = arguments.count > 2 ? arguments[2] : FileManager.default.currentDirectoryPath
         let destinationPath = setupSBMBinDirectory()
         removeBinaryAndMetadata(for: projectDirectory, in: destinationPath)
+        
+        case "-clean":
+        let projectDirectory = arguments.count > 2 ? arguments[2] : FileManager.default.currentDirectoryPath
+        cleanBuild(for: projectDirectory)
         
         default: 
             guard arguments.count >= 2 else {
