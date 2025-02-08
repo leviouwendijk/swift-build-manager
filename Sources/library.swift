@@ -40,8 +40,14 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
         return
     }
 
-    let modulePath = URL(fileURLWithPath: targetDirectory).appendingPathComponent(".build/\(buildString)/Modules/")
-    let projectRoot = URL(fileURLWithPath: targetDirectory)  // Root where .dylib/.a are stored
+    let modulePath = URL(fileURLWithPath: targetDirectory)
+        .appendingPathComponent(".build/\(buildString)/Modules/")
+
+    // let projectRoot = URL(fileURLWithPath: targetDirectory) // previous root
+
+    let libRoot = URL(fileURLWithPath: targetDirectory)
+        .appendingPathComponent(".build/\(buildString)/")  // Root where .dylib/.a are stored
+
     let baseModulesPath = URL(fileURLWithPath: setupSBMLibraryDirectory()).appendingPathComponent(libraryName)
     let fileManager = FileManager.default
 
@@ -58,7 +64,7 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
             }
 
         // Collect library files from **project root**
-        let libraryFiles = try fileManager.contentsOfDirectory(atPath: projectRoot.path)
+        let libraryFiles = try fileManager.contentsOfDirectory(atPath: libRoot.path)
             .filter { $0.hasSuffix(".dylib") || $0.hasSuffix(".a") }
 
         guard !moduleFiles.isEmpty || !libraryFiles.isEmpty else {
@@ -66,34 +72,34 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
             return
         }
 
-        if local {
-        // Move module files
-        for file in moduleFiles {
-            let sourceURL = modulePath.appendingPathComponent(file)
-            let destinationURL = baseModulesPath.appendingPathComponent(file)
+        if !local {
+            // Move module files
+            for file in moduleFiles {
+                let sourceURL = modulePath.appendingPathComponent(file)
+                let destinationURL = baseModulesPath.appendingPathComponent(file)
 
-            try? fileManager.removeItem(at: destinationURL)
-            try fileManager.copyItem(at: sourceURL, to: destinationURL)
+                try? fileManager.removeItem(at: destinationURL)
+                try fileManager.copyItem(at: sourceURL, to: destinationURL)
 
-            print("Module file moved: \(file)".ansi(.brightBlack, .bold))
-        }
+                print("Module file moved: \(file)".ansi(.brightBlack, .bold))
+            }
 
-        // Move library files
-        for file in libraryFiles {
-            let sourceURL = projectRoot.appendingPathComponent(file)
-            let destinationURL = baseModulesPath.appendingPathComponent(file)
+            // Move library files
+            for file in libraryFiles {
+                let sourceURL = libRoot.appendingPathComponent(file)
+                let destinationURL = baseModulesPath.appendingPathComponent(file)
 
-            try? fileManager.removeItem(at: destinationURL)
-            try fileManager.copyItem(at: sourceURL, to: destinationURL)
+                try? fileManager.removeItem(at: destinationURL)
+                try fileManager.copyItem(at: sourceURL, to: destinationURL)
 
-            print("Library file moved: \(file)".ansi(.brightBlack, .bold))
-        }
+                print("Library file moved: \(file)".ansi(.brightBlack, .bold))
+            }
 
-        // Store metadata for tracking the library
-        let metadataPath = baseModulesPath.appendingPathComponent("library.metadata")
-        let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
-        try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
-        print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
+            // Store metadata for tracking the library
+            let metadataPath = baseModulesPath.appendingPathComponent("library.metadata")
+            let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
+            try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
+            print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
         } else {
             print("Build retained locally".ansi(.brightBlack))
         }
@@ -105,7 +111,7 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
 
     print("\nLibrary build complete!".ansi(.green))
     if local {
-        print("\n\(libraryName)/ is now locally available.".ansi(.green))
+        print("\n'\(libraryName)' is now locally available.".ansi(.green))
     } else {
         print("\nModules are now in sbm-bin/modules/\(libraryName)/.".ansi(.green))
     }

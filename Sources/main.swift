@@ -359,9 +359,9 @@ func main() {
 
             if isLibraryBuild {
                 if isLocalBuild {
-                    buildAndDeployLibrary(targetDirectory: projectDirectory, buildType: buildType, local: false)
-                } else {
                     buildAndDeployLibrary(targetDirectory: projectDirectory, buildType: buildType, local: true)
+                } else {
+                    buildAndDeployLibrary(targetDirectory: projectDirectory, buildType: buildType, local: false)
                 }
             } else {
                 if isLocalBuild {
