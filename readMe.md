@@ -83,6 +83,10 @@ Adding a specific output directory where the binary will be placed:
 sbm -r /myproject/path /my/bin
 ```
 
-
 ---
 
+Building libraries:
+
+```bash
+sbm -r --lib
+```
