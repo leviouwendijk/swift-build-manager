@@ -14,6 +14,15 @@ enum BuildType: String {
             return nil
         }
     }
+    
+    func directoryString() -> String {
+        switch self {
+        case .debug:
+            return "debug"
+        case .release:
+            return "release"
+        }
+    }
 }
 
 // Utility to run shell commands
@@ -309,6 +318,7 @@ func main() {
         case "-h", "-help":
         showAvailableCommands()
 
+
         case "-rm":
         let projectDirectory = arguments.count > 2 ? arguments[2] : FileManager.default.currentDirectoryPath
         let destinationPath = setupSBMBinDirectory()
@@ -340,21 +350,28 @@ func main() {
                 exit(1)
             }
 
+            let isLibraryBuild = arguments.contains("--lib") || arguments.contains("--library")
             let isLocalBuild = arguments.contains("-l") || arguments.contains("-local")
             
             // Determine the project directory and destination path
             let projectDirectory = arguments.count > 2 && arguments[2].first != "-" ? arguments[2] : FileManager.default.currentDirectoryPath
             let destinationPath = arguments.count > 3 ? arguments[3] : setupSBMBinDirectory()
 
-            if isLocalBuild {
-                buildWithoutDeploy(targetDirectory: projectDirectory, buildType: buildType)
+            if isLibraryBuild {
+                if isLocalBuild {
+                    buildAndDeployLibrary(targetDirectory: projectDirectory, buildType: buildType, local: false)
+                } else {
+                    buildAndDeployLibrary(targetDirectory: projectDirectory, buildType: buildType, local: true)
+                }
             } else {
-                buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
+                if isLocalBuild {
+                    buildWithoutDeploy(targetDirectory: projectDirectory, buildType: buildType)
+                } else {
+                    buildAndDeploy(targetDirectory: projectDirectory, buildType: buildType, destinationPath: destinationPath)
+                }
             }
     }
     print("")
 }
 
 main()
-
-
