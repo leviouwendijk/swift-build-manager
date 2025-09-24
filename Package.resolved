@@ -1,0 +1,51 @@
+{
+  "originHash" : "295f47c18f9ea25fe8e3954030166fbc27769b16c08e34931af14632e70c4485",
+  "pins" : [
+    {
+      "identity" : "extensions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Extensions.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "3310d463b1bc509cccd8e75f0acc221e153f5dff"
+      }
+    },
+    {
+      "identity" : "interfaces",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Interfaces.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "81efcacdb21fcb6a24d97115d4231bed97c70020"
+      }
+    },
+    {
+      "identity" : "plate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/plate.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "184a36b4859cbea8ffe5cec9526a367127b16250"
+      }
+    },
+    {
+      "identity" : "structures",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Structures.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "ee6c6836b897caff5a2f9111351976264a043076"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "04695ec5448962bcd5e4616ed184b8a2168751e7"
+      }
+    }
+  ],
+  "version" : 3
+}

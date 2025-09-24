@@ -1,0 +1,26 @@
+import Foundation
+
+enum BuildType: String {
+    case debug = "-d"
+    case release = "-r"
+    
+    static func fromArgument(_ arg: String) -> BuildType? {
+        switch arg.lowercased() {
+        case "-d", "-debug":
+            return .debug
+        case "-r", "-release":
+            return .release
+        default:
+            return nil
+        }
+    }
+    
+    func directoryString() -> String {
+        switch self {
+        case .debug:
+            return "debug"
+        case .release:
+            return "release"
+        }
+    }
+}

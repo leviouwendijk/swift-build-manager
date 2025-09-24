@@ -1,28 +1,15 @@
 import Foundation
+import Interfaces
+import plate
 
-enum BuildType: String {
-    case debug = "-d"
-    case release = "-r"
-    
-    static func fromArgument(_ arg: String) -> BuildType? {
-        switch arg.lowercased() {
-        case "-d", "-debug":
-            return .debug
-        case "-r", "-release":
-            return .release
-        default:
-            return nil
-        }
-    }
-    
-    func directoryString() -> String {
-        switch self {
-        case .debug:
-            return "debug"
-        case .release:
-            return "release"
-        }
-    }
+@inline(__always)
+private func paint(_ s: String) -> String {
+    s
+    .replacingOccurrences(of: "production", with: "production".ansi(.bold))
+    .replacingOccurrences(of: "debugging",  with: "debugging".ansi(.bold))
+    .replacingOccurrences(of: "error",      with: "error".ansi(.red))
+    .replacingOccurrences(of: "warning",    with: "warning".ansi(.yellow))
+    .replacingOccurrences(of: "Build complete!", with: "Build complete!".ansi(.green))
 }
 
 // Utility to run shell commands
@@ -59,39 +46,90 @@ func runShellCommand(_ command: String, in directory: String = FileManager.defau
     return task.terminationStatus == 0
 }
 
-// Locate the executable target name from Package.swift based on package name or first available target
-func getTargetNames(from directory: String) -> [String]? {
-    let packageSwiftPath = URL(fileURLWithPath: directory).appendingPathComponent("Package.swift").path
-    guard let packageContents = try? String(contentsOfFile: packageSwiftPath) else {
-        print("Error: Could not read Package.swift.".ansi(.red))
-        return nil
-    }
-    
-    // Capture the package name
-    let packageNameRegex = try! NSRegularExpression(pattern: #"name:\s*"([^"]+)""#, options: [])
-    var packageName: String?
-    if let packageMatch = packageNameRegex.firstMatch(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)),
-       let nameRange = Range(packageMatch.range(at: 1), in: packageContents) {
-        packageName = String(packageContents[nameRange])
-    }
-    print("Package identifier: ".ansi(.brightBlack) + "\(packageName ?? "nil")".ansi(.brightBlack, .bold))
+// temp new
+func capture(_ argv: [String], in directory: String) throws -> Data {
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    p.arguments = argv
+    p.currentDirectoryURL = URL(fileURLWithPath: directory)
 
-    // Capture executable target names
-    let targetNameRegex = try! NSRegularExpression(pattern: #"executableTarget\s*\(\s*name:\s*"([^"]+)""#, options: [])
-    var targetNames: [String] = []
-    targetNameRegex.enumerateMatches(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)) { match, _, _ in
-        if let match = match, let targetRange = Range(match.range(at: 1), in: packageContents) {
-            targetNames.append(String(packageContents[targetRange]))
-        }
-    }
+    let out = Pipe()
+    let err = Pipe()
+    p.standardOutput = out
+    p.standardError = err
 
-    if targetNames.isEmpty {
-        print("Error: No executable targets found in Package.swift.".ansi(.red))
-        return nil
-    }
+    try p.run()
+    p.waitUntilExit()
 
-    return targetNames
+    if p.terminationStatus != 0 {
+        let e = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        throw NSError(domain: "sbm.capture", code: Int(p.terminationStatus),
+                      userInfo: [NSLocalizedDescriptionKey: e])
+    }
+    return out.fileHandleForReading.readDataToEndOfFile()
 }
+
+func dumpPackageData(for directory: String) throws -> Data {
+    if isatty(STDIN_FILENO) == 0 {
+        return FileHandle.standardInput.readDataToEndOfFile()
+    }
+    return try capture(["swift", "package", "dump-package"], in: directory)
+}
+
+func getTargetNames(from directory: String) -> [String]? {
+    do {
+        let data = try dumpPackageData(for: directory)
+        let blob = SwiftPackageDumpBlob(raw: data)
+        let reader = try SwiftPackageDumpReader(blob: blob)
+
+        if let pkg = reader.packageName() {
+            print("Package: \(pkg)".ansi(.brightBlack))
+        }
+
+        let names = reader.executableTargetNames()
+        if names.isEmpty {
+            print("Error: No executable targets found in dump-package output.".ansi(.red))
+            return nil
+        }
+        return names
+    } catch {
+        print("Error reading dump-package JSON: \(error.localizedDescription)".ansi(.red))
+        return nil
+    }
+}
+
+// func getTargetNames(from directory: String) -> [String]? {
+//     let packageSwiftPath = URL(fileURLWithPath: directory).appendingPathComponent("Package.swift").path
+//     guard let packageContents = try? String(contentsOfFile: packageSwiftPath) else {
+//         print("Error: Could not read Package.swift.".ansi(.red))
+//         return nil
+//     }
+    
+//     // Capture the package name
+//     let packageNameRegex = try! NSRegularExpression(pattern: #"name:\s*"([^"]+)""#, options: [])
+//     var packageName: String?
+//     if let packageMatch = packageNameRegex.firstMatch(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)),
+//        let nameRange = Range(packageMatch.range(at: 1), in: packageContents) {
+//         packageName = String(packageContents[nameRange])
+//     }
+//     print("Package identifier: ".ansi(.brightBlack) + "\(packageName ?? "nil")".ansi(.brightBlack, .bold))
+
+//     // Capture executable target names
+//     let targetNameRegex = try! NSRegularExpression(pattern: #"executableTarget\s*\(\s*name:\s*"([^"]+)""#, options: [])
+//     var targetNames: [String] = []
+//     targetNameRegex.enumerateMatches(in: packageContents, options: [], range: NSRange(location: 0, length: packageContents.utf16.count)) { match, _, _ in
+//         if let match = match, let targetRange = Range(match.range(at: 1), in: packageContents) {
+//             targetNames.append(String(packageContents[targetRange]))
+//         }
+//     }
+
+//     if targetNames.isEmpty {
+//         print("Error: No executable targets found in Package.swift.".ansi(.red))
+//         return nil
+//     }
+
+//     return targetNames
+// }
 
 func removeBinaryAndMetadata(for targetDirectory: String, in destinationPath: String) {
     guard let targetNames = getTargetNames(from: targetDirectory) else {
@@ -130,7 +168,8 @@ func buildWithoutDeploy(targetDirectory: String, buildType: BuildType) {
     print("Building project locally...")
     guard runShellCommand(buildCommand, in: targetDirectory) else {
         print("Error: Build failed.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
     print("")
     print("Build complete. Binary kept in project directory, and not moved to sbm-bin.".ansi(.green))
@@ -141,7 +180,8 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     print("Building project...")
     guard runShellCommand(buildCommand, in: targetDirectory) else {
         print("Error: Build failed.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
 
     print("") 
@@ -150,7 +190,8 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
     let projectFolderName = URL(fileURLWithPath: targetDirectory).lastPathComponent
     guard let targetNames = getTargetNames(from: targetDirectory) else {
         print("Error: Could not determine executable target names.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
     
     for targetName in targetNames {
@@ -176,7 +217,8 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
             }
         } catch {
             print("Error: Failed to replace binary at ".ansi(.brightBlack) + "\(destinationPath.ansi(.brightBlack, .bold)): \(error)".ansi(.red))
-            return
+            // return
+            exit(1)
         }
         
         // Step 4: Create metadata file with project root information
@@ -210,7 +252,8 @@ func cleanBuild(for targetDirectory: String) {
     guard runShellCommand(cleanCommand, in: targetDirectory) else {
         print("")
         print("Error: Failed to clean build artifacts.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
 
     print("")

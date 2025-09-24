@@ -1,5 +1,19 @@
 import Foundation
 
+struct Subcommand {
+    let command: String
+    let details: String
+}
+
+let commandWidth = 40
+let detailsWidth = 60
+
+extension Subcommand: CustomStringConvertible {
+    var description: String {
+        command.align(.left, commandWidth) + details.align(.right, detailsWidth) 
+    }
+}
+
 let availableCommands: [Subcommand] = [
     Subcommand(command: "sbm -r", details: "Builds in release mode, places binary in '~/sbm-bin'"),
     Subcommand(command: "sbm -d", details: "Builds in debug mode, places binary in '~/sbm-bin'"),

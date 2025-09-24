@@ -21,9 +21,9 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
 
     guard let libraryName = getPackageName(from: targetDirectory) else {
         print("Error: Could not determine package name.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
-
 
     let buildCommand = """
     swift build -c \(buildString) \
@@ -37,7 +37,8 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
 
     guard runShellCommand(buildCommand, in: targetDirectory) else {
         print("Error: Build failed.".ansi(.red))
-        return
+        // return
+        exit(1)
     }
 
     let modulePath = URL(fileURLWithPath: targetDirectory)
@@ -69,7 +70,8 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
 
         guard !moduleFiles.isEmpty || !libraryFiles.isEmpty else {
             print("Error: No module or library files found.".ansi(.red))
-            return
+            // return
+            exit(1)
         }
 
         if !local {
@@ -106,7 +108,8 @@ func buildAndDeployLibrary(targetDirectory: String, buildType: BuildType, local:
 
     } catch {
         print("Error: Could not move module or library files: \(error)".ansi(.red))
-        return
+        // return
+        exit(1)
     }
 
     print("\nLibrary build complete!".ansi(.green))
