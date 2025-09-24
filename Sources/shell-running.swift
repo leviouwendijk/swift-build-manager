@@ -1,0 +1,79 @@
+import Foundation
+import Interfaces
+import plate
+
+let colorables: [ColorableString] = [
+    .init(
+        selection: ["production", "debugging"],
+        colors: [.bold]
+    ),
+
+    .init(
+        selection: ["error"],
+        colors: [.red]
+    ),
+
+    .init(
+        selection: ["warning"],
+        colors: [.yellow]
+    ),
+
+    .init(
+        selection: ["Build complete!"],
+        colors: [.green]
+    )
+]
+
+@discardableResult
+func runShellCommand(
+    _ command: String,
+    in directory: String = FileManager.default.currentDirectoryPath
+) async -> Bool {
+    var opt = Shell.Options()
+    opt.cwd = URL(fileURLWithPath: directory)
+
+    opt.teeToStdout = false
+    opt.teeToStderr = false
+    opt.onStdoutChunk = { chunk in
+        if let t = String(data: chunk, encoding: .utf8) { 
+            print(t.paint(colorables), terminator: "") 
+        }
+        else { FileHandle.standardOutput.write(chunk) }
+    }
+    opt.onStderrChunk = { chunk in
+        if let t = String(data: chunk, encoding: .utf8) { 
+            fputs(t.paint(colorables), stderr) 
+        }
+        else { FileHandle.standardError.write(chunk) }
+    }
+
+    do {
+        _ = try await Shell(.bash).run(command, options: opt)
+        return true
+    } catch {
+        fputs("\(error)\n", stderr)
+        return false
+    }
+}
+
+func capture(_ argv: [String], in directory: String) async throws -> Data {
+    var opt = Shell.Options()
+    opt.cwd = URL(fileURLWithPath: directory)
+    let r = try await Shell(.path("/usr/bin/env"))
+        .run("/usr/bin/env", argv, options: opt)
+    if let code = r.exitCode, code != 0 {
+        let e = r.stderrText()
+        throw NSError(
+            domain: "sbm.capture", code: code,
+            userInfo: [NSLocalizedDescriptionKey: e]
+        )
+    }
+    return r.stdout
+}
+
+func dumpPackageData(for directory: String) async throws -> Data {
+    if isatty(STDIN_FILENO) == 0 {
+        return FileHandle.standardInput.readDataToEndOfFile()
+    }
+    return try await capture(["swift", "package", "dump-package"], in: directory)
+}
