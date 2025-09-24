@@ -1,6 +1,6 @@
 import Foundation
 
-enum BuildType: String {
+enum BuildType: String, RawRepresentable {
     case debug = "-d"
     case release = "-r"
     

@@ -1,6 +1,15 @@
 {
-  "originHash" : "295f47c18f9ea25fe8e3954030166fbc27769b16c08e34931af14632e70c4485",
+  "originHash" : "d724e2e5e956993f8ac4a223a844691e295cebf0667e4851f4fa3c475bcfe7ae",
   "pins" : [
+    {
+      "identity" : "executable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Executable.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "97376770941e7e8e018b83d6a3aeff676fbb2273"
+      }
+    },
     {
       "identity" : "extensions",
       "kind" : "remoteSourceControl",
@@ -25,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/plate.git",
       "state" : {
         "branch" : "master",
-        "revision" : "4750a44498d2aa6b3ad2e107cb4803d3afdaef2b"
+        "revision" : "1a04bbb14ac032ebce0ae3bb2f71aa4d9c10712a"
       }
     },
     {

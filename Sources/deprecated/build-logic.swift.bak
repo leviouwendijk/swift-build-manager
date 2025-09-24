@@ -2,33 +2,41 @@ import Foundation
 import Interfaces
 import plate
 
-func buildOnly(targetDirectory: String, buildType: BuildType) async throws {
-    let buildCmd = buildType == .debug ? "swift build -c debug" : "swift build -c release"
-    print("Building project locally...")
-    guard await runShellCommand(buildCmd, in: targetDirectory) else {
+func build(targetDirectory: String, buildType: BuildType) async throws {
+    let args = buildType == .debug ? ["build", "-c", "debug"] : ["build", "-c", "release"]
+    print("Building project...")
+    guard await runShellCommand("swift", args, in: targetDirectory) else {
         throw NSError(domain: "sbm.build", code: 1, userInfo: [NSLocalizedDescriptionKey: "Build failed"])
     }
+}
+
+func buildOnly(targetDirectory: String, buildType: BuildType) async throws {
+    try await build(targetDirectory: targetDirectory, buildType: buildType)
     print("\nBuild complete. Binary kept in project directory, not moved to sbm-bin.".ansi(.green))
 }
 
-func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPath: String) async throws {
-    let buildCmd = buildType == .debug ? "swift build -c debug" : "swift build -c release"
-    print("Building project...")
-    guard await runShellCommand(buildCmd, in: targetDirectory) else {
-        throw NSError(domain: "sbm.build", code: 1, userInfo: [NSLocalizedDescriptionKey: "Build failed"])
-    }
+func buildAndDeploySelected(
+    targetDirectory: String,
+    buildType: BuildType,
+    defaultDestination: String,
+    targets: [String],
+    perTargetDestination: [String:String] = [:]
+) async throws {
+    try await build(targetDirectory: targetDirectory, buildType: buildType)
 
-    print("\nMoving binary to " + "sbm-bin".ansi(.italic) + "...")
+    print("\nMoving selected binaries to " + "sbm-bin".ansi(.italic) + "...")
     let projectFolderName = URL(fileURLWithPath: targetDirectory).lastPathComponent
-    guard let targetNames = await getTargetNames(from: targetDirectory) else {
-        throw NSError(domain: "sbm.deploy", code: 2, userInfo: [NSLocalizedDescriptionKey: "No executable targets found"])
+    let buildPrefix = (buildType == .debug ? ".build/debug/" : ".build/release/")
+
+    guard !targets.isEmpty else {
+        throw NSError(domain: "sbm.deploy", code: 2, userInfo: [NSLocalizedDescriptionKey: "No selected executables to deploy"])
     }
 
-    for targetName in targetNames {
+    for targetName in targets {
         print("")
-        let buildPath = (buildType == .debug ? ".build/debug/" : ".build/release/") + targetName
-        let sourceURL = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPath)
-        let destinationURL = URL(fileURLWithPath: destinationPath).appendingPathComponent(targetName)
+        let sourceURL = URL(fileURLWithPath: targetDirectory).appendingPathComponent(buildPrefix + targetName)
+        let destinationRoot = perTargetDestination[targetName] ?? defaultDestination
+        let destinationURL = URL(fileURLWithPath: destinationRoot).appendingPathComponent(targetName)
 
         var binaryExists = false
         var binaryPlaced = false
@@ -50,7 +58,13 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 
         // metadata
         let metadataPath = destinationURL.deletingLastPathComponent().appendingPathComponent("\(targetName).metadata")
-        let metadataContent = "ProjectRootPath=\(targetDirectory)\n"
+        let metadataContent =
+        """
+        ProjectRootPath=\(targetDirectory)
+        BuildType=\(buildType.directoryString())
+        DeployedAt=\(ISO8601DateFormatter().string(from: Date()))
+        DestinationRoot=\(destinationRoot)
+        """
         do {
             try metadataContent.write(to: metadataPath, atomically: true, encoding: .utf8)
             print("Metadata file created at ".ansi(.brightBlack) + "\(metadataPath.path)".ansi(.brightBlack, .bold))
@@ -67,9 +81,9 @@ func buildAndDeploy(targetDirectory: String, buildType: BuildType, destinationPa
 }
 
 func cleanBuild(for targetDirectory: String) async throws {
-    let cmd = "swift package clean"
+    let args = ["package", "clean"]
     print("Cleaning build artifacts in project directory: \(targetDirectory)".ansi(.brightBlack))
-    guard await runShellCommand(cmd, in: targetDirectory) else {
+    guard await runShellCommand("swift", args, in: targetDirectory) else {
         throw NSError(domain: "sbm.clean", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to clean build artifacts"])
     }
     print("\nClean successful!".ansi(.green))

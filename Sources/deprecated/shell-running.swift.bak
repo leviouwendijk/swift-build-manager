@@ -26,7 +26,8 @@ let colorables: [ColorableString] = [
 
 @discardableResult
 func runShellCommand(
-    _ command: String,
+    _ launcher: String,
+    _ args: [String],
     in directory: String = FileManager.default.currentDirectoryPath
 ) async -> Bool {
     var opt = Shell.Options()
@@ -48,7 +49,7 @@ func runShellCommand(
     }
 
     do {
-        _ = try await Shell(.env).run(command, options: opt)
+        _ = try await Shell(.zsh).run(launcher, args, options: opt)
         return true
     } catch {
         fputs("\(error)\n", stderr)
@@ -59,8 +60,8 @@ func runShellCommand(
 func capture(_ argv: [String], in directory: String) async throws -> Data {
     var opt = Shell.Options()
     opt.cwd = URL(fileURLWithPath: directory)
-    let r = try await Shell(.env)
-        .run("/usr/bin/env", argv, options: opt)
+    let r = try await Shell(.zsh)
+    .run("/usr/bin/env", argv, options: opt)
     if let code = r.exitCode, code != 0 {
         let e = r.stderrText()
         throw NSError(

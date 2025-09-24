@@ -8,17 +8,24 @@ func buildLibrary(targetDirectory: String, buildType: BuildType, local: Bool) as
         throw NSError(domain: "sbm.lib", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not determine package name."])
     }
 
-    let buildCommand = """
-    swift build -c \(buildString) \
-        -Xswiftc -enable-library-evolution \
-        -Xswiftc -emit-module-interface-path \
-        -Xswiftc .build/\(buildString)/Modules/\(libraryName).swiftinterface \
-        -Xswiftc -emit-library \
-        -Xswiftc -emit-module
-    """
+    let args = [
+        "build",
+        "-c",
+        "\(buildString)",
+        "-Xswiftc",
+        "-enable-library-evolution",
+        "-Xswiftc",
+        "-emit-module-interface-path",
+        "-Xswiftc",
+        ".build/\(buildString)/Modules/\(libraryName).swiftinterface",
+        "-Xswiftc",
+        "-emit-library",
+        "-Xswiftc",
+        "-emit-module",
+    ]
 
     print("Building library...")
-    guard await runShellCommand(buildCommand, in: targetDirectory) else {
+    guard await runShellCommand("swift", args, in: targetDirectory) else {
         throw NSError(domain: "sbm.lib", code: 2, userInfo: [NSLocalizedDescriptionKey: "Build failed"])
     }
 

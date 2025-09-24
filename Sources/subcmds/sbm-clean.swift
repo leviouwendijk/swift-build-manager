@@ -1,16 +1,18 @@
 import ArgumentParser
 import Foundation
+import Executable
 
 struct Clean: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Clean build artifacts (swift package clean)."
+        commandName: "clean",
+        abstract: "swift package clean"
     )
 
     @Option(name: [.customShort("p"), .long], help: "Project directory (defaults to CWD).")
     var project: String?
 
     func run() async throws {
-        let dir = project ?? FileManager.default.currentDirectoryPath
-        try await cleanBuild(for: dir)
+        let dirURL = URL(fileURLWithPath: project ?? FileManager.default.currentDirectoryPath)
+        try await Executable.Build.clean(at: dirURL)
     }
 }

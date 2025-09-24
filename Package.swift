@@ -12,6 +12,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", branch: "main"),
         .package(url: "https://github.com/leviouwendijk/plate.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Interfaces.git", branch: "master"),
+        .package(url: "https://github.com/leviouwendijk/Executable.git", branch: "master"),
     ],
     targets: [
         .executableTarget(
@@ -20,7 +21,11 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "plate", package: "plate"),
                 .product(name: "Interfaces", package: "Interfaces"),
-            ]
+                .product(name: "Executable", package: "Executable"),
+            ],
+            exclude: [
+                "deprecated"
+            ],
         ),
     ]
 )

@@ -5,9 +5,15 @@ import Foundation
 struct SBM: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "sbm",
-        abstract: "Swift Build Manager — build, deploy, and manage Swift binaries.",
-        version: "1.0",
-        subcommands: [Build.self, Clean.self, Remove.self, Bin.self, Lib.self],
+        abstract: "Swift Build Manager (thin CLI over Executable library).",
+        subcommands: [
+            Build.self,
+            Clean.self,
+            Remove.self,
+            Lib.self,
+            AppContent.self,
+            BinList.self
+        ],
         defaultSubcommand: Build.self
     )
 }

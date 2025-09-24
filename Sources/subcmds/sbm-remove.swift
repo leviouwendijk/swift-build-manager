@@ -1,20 +1,30 @@
 import ArgumentParser
 import Foundation
+import Executable
 
-struct Remove: AsyncParsableCommand {
+struct Remove: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Remove deployed binary + metadata for the package from sbm-bin."
+        commandName: "remove",
+        abstract: "Remove deployed binary and its metadata."
     )
 
-    @Option(name: [.customShort("p"), .long], help: "Project directory (defaults to CWD).")
-    var project: String?
-
-    @Option(name: [.customShort("o"), .long], help: "Destination path (defaults to ~/sbm-bin).")
+    @Option(name: [.customShort("o"), .long], help: "Destination root (defaults to ~/sbm-bin).")
     var destination: String?
 
-    func run() async throws {
-        let dir = project ?? FileManager.default.currentDirectoryPath
-        let dest = destination ?? setupSBMBinDirectory()
-        await removeBinaryAndMetadata(for: dir, in: dest)
+    @Option(name: [.customShort("t"), .long], parsing: .upToNextOption, help: "Target(s) to remove (repeatable).")
+    var target: [String]
+
+    func run() throws {
+        let destRoot = URL(fileURLWithPath: destination ?? defaultSBMBin())
+        for t in target {
+            try Executable.Remove.deployedBinary(named: t, at: destRoot)
+        }
+    }
+
+    private func defaultSBMBin() -> String {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let path = "\(home)/sbm-bin"
+        try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
+        return path
     }
 }
