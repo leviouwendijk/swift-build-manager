@@ -48,7 +48,7 @@ func runShellCommand(
     }
 
     do {
-        _ = try await Shell(.bash).run(command, options: opt)
+        _ = try await Shell(.env).run(command, options: opt)
         return true
     } catch {
         fputs("\(error)\n", stderr)
@@ -59,7 +59,7 @@ func runShellCommand(
 func capture(_ argv: [String], in directory: String) async throws -> Data {
     var opt = Shell.Options()
     opt.cwd = URL(fileURLWithPath: directory)
-    let r = try await Shell(.path("/usr/bin/env"))
+    let r = try await Shell(.env)
         .run("/usr/bin/env", argv, options: opt)
     if let code = r.exitCode, code != 0 {
         let e = r.stderrText()
