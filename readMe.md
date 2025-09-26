@@ -40,18 +40,18 @@ sbm app [options]                 Create/refresh a .app bundle (sapp niceties)
 Builds your package, then deploys selected executables to `~/sbm-bin` (or `--destination`).
 
 ```bash
-sbm -r                        # release build + deploy all executables
+sbm                        # release build + deploy all executables
 sbm --debug --local           # debug build, no deploy
-sbm -r -p /path/to/pkg        # choose project dir
-sbm -r --targets diskmap  # deploy only this target
-sbm -r --skip-targets DiskMapper   # deploy everything except this
-sbm -r --cli-only --keep-apps     # deploy CLIs, skip “app-like” targets
-sbm -r --map diskmap=$HOME/bin    # per-target custom destination
+sbm -p /path/to/pkg        # choose project dir
+sbm --targets diskmap  # deploy only this target
+sbm --skip-targets DiskMapper   # deploy everything except this
+sbm --cli-only --keep-apps     # deploy CLIs, skip “app-like” targets
+sbm --map diskmap=$HOME/bin    # per-target custom destination
 ```
 
 **Flags**
 
-* `-r, --release` / `-d, --debug` – build configuration (default: release)
+* `-d, --debug` – build configuration (default: release)
 * `-l, --local` – build only (skip deploy)
 * `-p, --project <DIR>` – project directory (default: CWD)
 * `-o, --destination <DIR>` – deploy destination (default: `~/sbm-bin`)
@@ -188,13 +188,13 @@ sbm app --sym-resources                   # just fix Resources symlink and exit
 Build & deploy all executables (release):
 
 ```bash
-sbm -r
+sbm 
 ```
 
 Build & deploy just a CLI named `diskmap`:
 
 ```bash
-sbm -r --targets diskmap
+sbm --targets diskmap
 ```
 
 Build but keep artifacts locally:
