@@ -47,8 +47,8 @@ struct Build: AsyncParsableCommand {
     // }
 
     // extra safety and clarity against recursive build invocations
-    @Flag(name: .customLong("__pkl_invoked"), help: .hidden)
-    var _pklInvoked = false
+    @Flag(help: .hidden)
+    var pklInvoked = false
 
     private func parseCSVish(_ values: [String]) -> [String] {
         values.flatMap { $0.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) } }
@@ -78,17 +78,33 @@ struct Build: AsyncParsableCommand {
                     from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
                 ),
                let cfg = try? BuildObjectConfiguration(from: pklURL),
-                !_pklInvoked, 
-                !cfg.compile.arguments.isEmpty,
+                !pklInvoked, 
+                // !cfg.compile.arguments.isEmpty,  REMOVE
                 // cfg.compile.use
                 (cfg.compile.use == true)
             {
                 let quoted = cfg.compile.arguments.map { String(reflecting: $0) }.joined(separator: " ")
-                print("Detected preconfigured build instructions, applying to sbm: \(quoted)")
+                print("Detected preconfigured build instructions, intercepting build commands.")
+                printi("(You provided no overriding flags or options).")
+                print()
+                printi("Arguments found: \(quoted)")
+                let cmdString = "sbm ".ansi(.bold) + "\(quoted.replacingOccurrences(of: "\"", with: ""))"
+                printi("Invocation (simulated): \(cmdString)")
 
-                let args = cfg.compile.arguments + ["--__pkl_invoked"]
-                var cmd = try Build.parseAsRoot(args)
-                try cmd.run()
+                var forwarded = cfg.compile.arguments
+
+                if let first = forwarded.first?.lowercased(),
+                   first == "build" || first == "sbm" {
+                    forwarded.removeFirst()
+                }
+
+                if !forwarded.contains("--pkl-invoked") {
+                    forwarded.append("--pkl-invoked")
+                }
+
+                let cmd = try Build.parse(forwarded)
+                try await cmd.run()
+                
                 return
             }
         }
