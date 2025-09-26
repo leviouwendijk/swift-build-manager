@@ -15,13 +15,13 @@ struct Remove: ParsableCommand {
     var target: [String]
 
     func run() throws {
-        let destRoot = URL(fileURLWithPath: destination ?? defaultSBMBin())
+        let destRoot = URL(fileURLWithPath: destination ?? fallback())
         for t in target {
             try Executable.Remove.deployedBinary(named: t, at: destRoot)
         }
     }
 
-    private func defaultSBMBin() -> String {
+    private func fallback() -> String {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         let path = "\(home)/sbm-bin"
         try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
