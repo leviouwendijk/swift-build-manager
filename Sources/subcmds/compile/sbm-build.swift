@@ -83,7 +83,11 @@ struct Build: AsyncParsableCommand {
                 // cfg.compile.use
                 (cfg.compile.use == true)
             {
-                let quoted = cfg.compile.arguments.map { String(reflecting: $0) }.joined(separator: " ")
+                let quoted = cfg.compile.arguments
+                .map { 
+                    String(reflecting: $0).replacingOccurrences(of: " ", with: "( )")
+                }.joined(separator: " ")
+
                 print("Detected preconfigured build instructions, intercepting build commands.")
                 printi("(You provided no overriding flags or options).")
                 print()
