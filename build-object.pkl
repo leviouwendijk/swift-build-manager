@@ -1,11 +1,25 @@
 uuid = "3003BECF-B8D2-4DB6-88AD-65B018724F5F"
 name = "sbm"
-type = "binary"
-version {
-    major = 1
-    minor = 0
-    patch = 0
+types {
+    "binary"
+}
+versions {
+    built {
+        major = 1
+        minor = 0
+        patch = 0
+    }
+
+    repository {
+        major = 1
+        minor = 0
+        patch = 0
+    }
+}
+compile {
+    use = false
+    arguments {  }
 }
 details = "Swift Package Manager utilities (manage build objects)"
 author = "Levi Ouwendijk"
-update = ""
+update = "https://raw.githubusercontent.com/leviouwendijk/swift-build-manager/master/build-object.pkl"

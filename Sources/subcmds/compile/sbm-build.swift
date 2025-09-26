@@ -1,6 +1,6 @@
-import ArgumentParser
-
 import Foundation
+import plate
+import ArgumentParser
 import Executable
 
 struct Build: AsyncParsableCommand {
@@ -46,6 +46,10 @@ struct Build: AsyncParsableCommand {
     //     }
     // }
 
+    // extra safety and clarity against recursive build invocations
+    @Flag(name: .customLong("__pkl_invoked"), help: .hidden)
+    var _pklInvoked = false
+
     private func parseCSVish(_ values: [String]) -> [String] {
         values.flatMap { $0.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) } }
         .filter { !$0.isEmpty }
@@ -69,6 +73,26 @@ struct Build: AsyncParsableCommand {
     }
 
     func run() async throws {
+        if !userProvidedAnyFlagsOrOptions() {
+            if let pklURL = try? BuildObjectConfiguration.traverseForBuildObjectPkl(
+                    from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+                ),
+               let cfg = try? BuildObjectConfiguration(from: pklURL),
+                !_pklInvoked, 
+                !cfg.compile.arguments.isEmpty,
+                // cfg.compile.use
+                (cfg.compile.use == true)
+            {
+                let quoted = cfg.compile.arguments.map { String(reflecting: $0) }.joined(separator: " ")
+                print("Detected preconfigured build instructions, applying to sbm: \(quoted)")
+
+                let args = cfg.compile.arguments + ["--__pkl_invoked"]
+                var cmd = try Build.parseAsRoot(args)
+                try cmd.run()
+                return
+            }
+        }
+
         let dirURL = URL(fileURLWithPath: project ?? FileManager.default.currentDirectoryPath)
         let destRoot = URL(fileURLWithPath: destination ?? defaultSBMBin())
         let mode: Executable.Build.Config.Mode = (debug ? .debug : .release)
@@ -109,5 +133,12 @@ struct Build: AsyncParsableCommand {
             targets: selected,
             perTargetDestinations: perMap
         )
+    }
+}
+
+extension Build {
+    private func userProvidedAnyFlagsOrOptions() -> Bool {
+        debug || local || project != nil || destination != nil ||
+        !targets.isEmpty || !skipTargets.isEmpty || cliOnly || keepApps || !map.isEmpty
     }
 }
