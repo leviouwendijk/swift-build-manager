@@ -49,11 +49,11 @@ struct AppContent: AsyncParsableCommand {
         // Wizard: fill missing values interactively (only if requested)
         var (resolvedApp, resolvedTarget, resolvedMode, resolvedPlist, resolvedBundle) =
             try wizard ? runWizard(
-                            project: proj, 
-                            packageName: pkgName,
-                            execTargets: execTargets
-                        ) : 
-                        resolveNonInteractive(packageName: pkgName, execTargets: execTargets)
+                project: proj, 
+                packageName: pkgName,
+                execTargets: execTargets
+            ) : 
+            resolveNonInteractive(packageName: pkgName, execTargets: execTargets)
 
         if let flagName = appName { resolvedApp = flagName }
         if let flagTarget = target { resolvedTarget = flagTarget }

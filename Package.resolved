@@ -1,5 +1,5 @@
 {
-  "originHash" : "d724e2e5e956993f8ac4a223a844691e295cebf0667e4851f4fa3c475bcfe7ae",
+  "originHash" : "f03c24e3a7f69da0b6695d81b0ffbd382678dd910b6951bbbe77e1ea26f48fda",
   "pins" : [
     {
       "identity" : "executable",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "97376770941e7e8e018b83d6a3aeff676fbb2273"
+        "revision" : "6b2f876ef517cec54608140e0a6ca982be02e321"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "bd39de6d52da6835ac97d78b2ee674d0101c39a6"
+        "revision" : "8b2c2827fdf99b55456c9ee8673b003aafed9e84"
       }
     },
     {
@@ -34,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/plate.git",
       "state" : {
         "branch" : "master",
-        "revision" : "1a04bbb14ac032ebce0ae3bb2f71aa4d9c10712a"
+        "revision" : "7e9a1eb0ea8d26c37d3ff8acda9319f56c71fb5e"
       }
     },
     {

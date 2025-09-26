@@ -12,7 +12,8 @@ struct SBM: AsyncParsableCommand {
             Remove.self,
             Lib.self,
             AppContent.self,
-            BinList.self
+            BinList.self,
+            Pack.self
         ],
         defaultSubcommand: Build.self
     )
