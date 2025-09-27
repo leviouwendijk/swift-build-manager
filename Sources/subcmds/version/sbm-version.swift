@@ -10,18 +10,28 @@ struct Version: AsyncParsableCommand {
     )
 
     func run() async throws {
-        let url = try BuildObjectConfiguration.traverseForBuildObjectPkl(
+        // let url = try BuildObjectConfiguration.traverseForBuildObjectPkl(
+        //     from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        // )
+        // let cfg = try BuildObjectConfiguration(from: url)
+
+        let obj_url = try BuildObjectConfiguration.traverseForBuildObjectPkl(
             from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
         )
-        let cfg = try BuildObjectConfiguration(from: url)
+        let obj = try BuildObjectConfiguration(from: obj_url)
 
-        print("name: \(cfg.name)")
-        print("types: \(cfg.types.map(\.rawValue).joined(separator: ", "))")
+        let compl_url = try CompiledLocalBuildObject.traverseForCompiledObjectPkl(
+            from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        )
+        let compl = try CompiledLocalBuildObject(from: compl_url)
+
+        print("name: \(obj.name)")
+        print("types: \(obj.types.map(\.rawValue).joined(separator: ", "))")
         print("versions:")
-        print("  built:      \(cfg.versions.built.major).\(cfg.versions.built.minor).\(cfg.versions.built.patch)")
-        print("  repository: \(cfg.versions.repository.major).\(cfg.versions.repository.minor).\(cfg.versions.repository.patch)")
+        printi("compiled:   \(compl.version.string(prefixStyle: .none))")
+        printi("release:    \(obj.versions.release.string(prefixStyle: .none))")
 
-        if let div = try? await GitRepo.divergence(url.deletingLastPathComponent()) {
+        if let div = try? await GitRepo.divergence(obj_url.deletingLastPathComponent()) {
             print("git: ahead \(div.ahead), behind \(div.behind)")
         }
     }

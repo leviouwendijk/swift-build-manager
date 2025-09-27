@@ -2,7 +2,7 @@ import Foundation
 import ArgumentParser
 import plate
 
-enum BumpTarget: String, ExpressibleByArgument { case repository, built }
+enum BumpTarget: String, ExpressibleByArgument { case release, compiled }
 enum BumpLevel: String, ExpressibleByArgument { case major, minor, patch }
 
 struct Increment: ParsableCommand {
@@ -12,16 +12,21 @@ struct Increment: ParsableCommand {
     )
 
     @Option(name: .shortAndLong, help: "Which version to bump: repository (default) or built")
-    var target: BumpTarget = .repository
+    var target: BumpTarget = .release
 
     @Argument(help: "Level to bump: major | minor | patch")
     var level: BumpLevel
 
     func run() throws {
-        let url = try BuildObjectConfiguration.traverseForBuildObjectPkl(
+        let obj_url = try BuildObjectConfiguration.traverseForBuildObjectPkl(
             from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
         )
-        var cfg = try BuildObjectConfiguration(from: url)
+        var obj = try BuildObjectConfiguration(from: obj_url)
+
+        // let compl_url = try CompiledLocalBuildObject.traverseForCompiledObjectPkl(
+        //     from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        // )
+        // var compl = try CompiledLocalBuildObject(from: compl_url)
 
         func bump(_ v: inout ObjectVersion) {
             switch level {
@@ -31,27 +36,40 @@ struct Increment: ParsableCommand {
             }
         }
 
-        var vers = cfg.versions
         switch target {
-        case .repository: bump(&vers.repository)
-        case .built:      bump(&vers.built)
-        }
-        cfg = .init(
-            uuid: cfg.uuid,
-            name: cfg.name,
-            types: cfg.types,
-            versions: vers,
-            compile: cfg.compile,
-            details: cfg.details,
-            author: cfg.author,
-            update: cfg.update
-        )
-        try cfg.write(to: url)
-        print("Updated \(target.rawValue) → \(versValue(vers, target))")
-    }
+        case .release:
+            bump(&obj.versions.release)
 
-    private func versValue(_ v: ProjectVersions, _ t: BumpTarget) -> String {
-        let vv = (t == .repository) ? v.repository : v.built
-        return "\(vv.major).\(vv.minor).\(vv.patch)"
+            let cfg = BuildObjectConfiguration(
+                uuid: obj.uuid,
+                name: obj.name,
+                types: obj.types,
+                versions: obj.versions,
+                compile: obj.compile,
+                details: obj.details,
+                author: obj.author,
+                update: obj.update
+            )
+            try cfg.write(to: obj_url)
+            // print("Updated \(target.rawValue) → \(versValue(obj.versions, target))")
+            print("Updated \(target.rawValue) → \(obj.versions.release.string(prefixStyle: .short))")
+
+        case .compiled:     
+            // bump(&compl.version)
+
+            // let cfg = BuildObjectConfiguration(
+            //     uuid: obj.uuid,
+            //     name: obj.name,
+            //     types: obj.types,
+            //     versions: obj.versions,
+            //     compile: obj.compile,
+            //     details: obj.details,
+            //     author: obj.author,
+            //     update: obj.update
+            // )
+            // try cfg.write(to: obj_url)
+            // print("Updated \(target.rawValue) → \(versValue(obj.versions, target))")
+            print("Do not manually increment compiled object, build in order to do so.")
+        }
     }
 }

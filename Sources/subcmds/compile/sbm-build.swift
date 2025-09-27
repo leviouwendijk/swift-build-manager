@@ -73,6 +73,11 @@ struct Build: AsyncParsableCommand {
     }
 
     func run() async throws {
+        var effectiveArgv: [String] = InvocationArgs.argv ?? {
+            let a = Array(CommandLine.arguments.dropFirst())
+            return a
+        }()
+
         if !userProvidedAnyFlagsOrOptions() {
             if let pklURL = try? BuildObjectConfiguration.traverseForBuildObjectPkl(
                     from: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
@@ -106,8 +111,13 @@ struct Build: AsyncParsableCommand {
                     forwarded.append("--pkl-invoked")
                 }
 
-                let cmd = try Build.parse(forwarded)
-                try await cmd.run()
+                effectiveArgv = forwarded
+
+                // so that we can maintain persistence of argv
+                try await InvocationArgs.$argv.withValue(forwarded) {
+                    let cmd = try Build.parse(forwarded)
+                    try await cmd.run()
+                }
                 
                 return
             }
@@ -118,7 +128,7 @@ struct Build: AsyncParsableCommand {
         let mode: Executable.Build.Config.Mode = (debug ? .debug : .release)
         let config = Executable.Build.Config(mode: mode)
 
-        _ = try await Executable.Build.build(at: dirURL, config: config)
+        _ = try await Executable.Build.build(at: dirURL, config: config, argv_audit: effectiveArgv)
         guard !local else { return }
 
         let detailed = try await Executable.TargetsDetailed.list(in: dirURL)

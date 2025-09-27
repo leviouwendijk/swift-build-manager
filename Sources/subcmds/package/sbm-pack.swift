@@ -29,6 +29,9 @@ struct Pack: AsyncParsableCommand {
         @Option(name: [.short, .long], help: "Package directory (default: current directory).")
         var dir: String?
 
+        @Flag(name: .customShort("b"), help: "Rebuild after updates.")
+        var build: Bool = false
+
         mutating func run() async throws {
             let pkg = dir.map { URL(fileURLWithPath: $0, isDirectory: true) }
                 ?? URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
@@ -41,6 +44,12 @@ struct Pack: AsyncParsableCommand {
             print(div)
 
             print("Dependency update complete.".ansi(.green))
+
+            if build {
+                // invoke defaults
+                let cmd = try Build.parse([])
+                try await cmd.run()
+            }
         }
     }
 

@@ -20,26 +20,56 @@ struct Config: AsyncParsableCommand {
         var empty: Bool = false
 
         func run() async throws {
-            let dst = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-                .appendingPathComponent("build-object.pkl")
+            let (objectPkl, objectURL) = checkExists(for: "build-object.pkl")
+            let (compiledPkl, compiledURL) = checkExists(for: "compiled.pkl")
 
-            if FileManager.default.fileExists(atPath: dst.path) {
-                throw ValidationError("build-object.pkl already exists at \(dst.path)")
+            if !objectPkl { 
+                if empty {
+                    try BuildObjectConfiguration.new(to: objectURL)
+                    print("Created empty build-object.pkl")
+                    return
+                } else {
+                    try await setup(at: objectURL)
+                }
             }
 
-            if empty {
-                try BuildObjectConfiguration.new(to: dst)
-                print("Created empty build-object.pkl")
+            if !compiledPkl {
+                try CompiledLocalBuildObject.new(to: compiledURL)
+                print("Created empty compiled.pkl")
                 return
             }
+        }
 
+        func checkExists(for file: String) -> (Bool, URL) {
+            let dst = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent(file)
+
+            if FileManager.default.fileExists(atPath: dst.path) {
+                print("\(file) already exists at \(dst.path)")
+                return (true, dst)
+            } else {
+                print("\(file) does not yet exist at \(dst.path)")
+                return (false, dst)
+            }
+        }
+
+        func checkCompiledPkl() throws -> Void {
+            let dst = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent("compiled.pkl")
+
+            if FileManager.default.fileExists(atPath: dst.path) {
+                throw ValidationError("compiled.pkl already exists at \(dst.path)")
+            }
+        }
+
+        func setup(at buildObjectURL: URL) async throws -> Void {
             // wizard (no readline for update; auto-fetch)
             let cwd = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 
             print("Name:")
             let name = (readLine() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
 
-            print("Types (comma-separated: binary,application,script):")
+            print("Types (comma-separated: binary, application, script):")
             let typesLine = (readLine() ?? "")
             let typeStrings = typesLine.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             let types = try typeStrings.map {
@@ -69,15 +99,14 @@ struct Config: AsyncParsableCommand {
                 name: name.isEmpty ? (FileManager.default.currentDirectoryPath as NSString).lastPathComponent : name,
                 types: types,
                 versions: .init(
-                    built: ObjectVersion.default_version(for: .built),
-                    repository: .init(major: 0, minor: 1, patch: 0)
+                    release: .init(major: 0, minor: 1, patch: 0)
                 ),
                 compile: .init(use: false, arguments: []),
                 details: details,
                 author: author,
                 update: update
             )
-            try cfg.write(to: dst)
+            try cfg.write(to: buildObjectURL)
             print("Created build-object.pkl")
         }
     }
