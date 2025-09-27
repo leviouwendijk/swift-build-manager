@@ -23,6 +23,7 @@ struct SBM: AsyncParsableCommand {
             // version/
             Config.self,
             Increment.self,
+            Update.self,
             Modernize.self,
             Version.self,
             Remote.self
