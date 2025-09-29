@@ -9,6 +9,7 @@ struct SBM: AsyncParsableCommand {
         subcommands: [
             // app-bundle/
             AppContent.self,
+            AppExec.self,
 
             // build/
             Build.self,
