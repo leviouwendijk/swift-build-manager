@@ -17,6 +17,12 @@ struct Build: AsyncParsableCommand {
     @Flag(name: [.customShort("l"), .long], help: "Keep artifacts in .build (no deploy).")
     var local = false
 
+    @Flag(name: [.customShort("r"), .long], help: "Keep artifacts in .build (no deploy).")
+    var repo = false
+
+    @Flag(name: [.long], help: "Keep artifacts in .build (no deploy).")
+    var noMove = false
+
     @Option(name: [.customShort("p"), .long], help: "Project directory (defaults to CWD).")
     var project: String?
 
@@ -129,7 +135,10 @@ struct Build: AsyncParsableCommand {
         let config = Executable.Build.Config(mode: mode)
 
         _ = try await Executable.Build.build(at: dirURL, config: config, argv_audit: effectiveArgv)
+
         guard !local else { return }
+        guard !repo else { return }
+        guard !noMove else { return }
 
         let detailed = try await Executable.TargetsDetailed.list(in: dirURL)
         let allNames = detailed.map { $0.name }
@@ -168,7 +177,7 @@ struct Build: AsyncParsableCommand {
 
 extension Build {
     private func userProvidedAnyFlagsOrOptions() -> Bool {
-        debug || local || project != nil || destination != nil ||
+        debug || local || repo || noMove || project != nil || destination != nil ||
         !targets.isEmpty || !skipTargets.isEmpty || cliOnly || keepApps || !map.isEmpty
     }
 }
