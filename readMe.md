@@ -38,7 +38,7 @@ OPTIONS:
   -h, --help              Show help information.
 
 SUBCOMMANDS:
-  app                     Create/refresh a .app bundle wired to .build (sapp-style).
+  app                     Create/refresh a .app bundle wired to .build.
   x                       Try to execute the app bundle in this project.
   build (default)         Build a Swift package (debug/release) and optionally
                           deploy to '~/sbm-bin/'.

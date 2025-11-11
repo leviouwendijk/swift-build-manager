@@ -7,7 +7,7 @@ import plate
 struct AppContent: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "app",
-        abstract: "Create/refresh a .app bundle wired to .build (sapp-style)."
+        abstract: "Create/refresh a .app bundle wired to .build."
     )
 
     @Option(name: [.customShort("p"), .long], help: "Project directory (defaults to CWD).")
