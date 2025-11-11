@@ -14,8 +14,11 @@ struct SBM: AsyncParsableCommand {
             // build/
             Build.self,
             Lib.self,
+
+            // move/
             Remove.self,
             BinList.self,
+            Setup.self,
 
             // package/
             Clean.self,

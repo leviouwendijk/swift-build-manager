@@ -1,10 +1,14 @@
 # Swift Build Manager (`sbm`)
 
-`sbm` is a thin, friendly CLI over the **Executable** library for building Swift packages, deploying selected executables to a dedicated `$HOME/sbm-bin` folder, exporting libraries (module interfaces & artifacts), listing/removing deployed binaries, and (optionally) constructing `.app` bundles à la `sapp`.
+`sbm` is a thin CLI over the **Executable** library for building Swift packages, deploying selected executables to a dedicated `$HOME/sbm-bin` folder, exporting libraries (module interfaces & artifacts), listing/removing deployed binaries, and (optionally) constructing `.app` bundles, and build version tracking.
 
-* Keeps your own binaries in `~/sbm-bin` (or a path you choose).
+It simply runs Swift Package Manager under the hood.
+
+* Keeps your own binaries in `~/sbm-bin`.
 * Auto-overwrites on redeploy.
 * Writes a small sidecar metadata file per deployed binary.
+* Allows version tracking across builds.
+* Can build with confiruable flag and option overrides.
 
 ## Install & PATH
 
@@ -16,7 +20,7 @@ Add the binary path to your shell if needed:
 export PATH="$HOME/sbm-bin:$PATH"
 ```
 
-(You can pick a different destination via flags; `~/sbm-bin` is the default.)
+(You can pick a different destination via option flags; `~/sbm-bin` is the default.)
 
 ---
 
@@ -31,7 +35,67 @@ sbm remove -t <name> [-o DIR]     Remove a deployed binary + metadata
 sbm bin [-o DIR] [-d]             List deployed binaries (optionally detailed)
 sbm lib [options]                 Build library & export module artifacts
 sbm app [options]                 Create/refresh a .app bundle (sapp niceties)
+sbm setup                         Create the `~/sbm-bin/` directory
+sbm config                        Setup build-object.pkl (for version tracking) (will try to fetch remote origin build-object.pkl URL)
+sbm increment [major              Increments build-object version 
+    | minor 
+    | patch]
+sbm pack [-b]                     Runs updates on dependencies, -b flag rebuilds afterwards
 ```
+
+`sbm` will write a compiled version to the compiled.pkl.
+
+`sbm` building auto-appends the compiled.pkl to the .gitignore if they aren't found.
+
+This is intended for update tracking with easy CLI incrementing.
+
+Local versions are kept purely written from builds, while the remote build-object is authoritative.
+
+That ensures that compiled version != build-object release version when the build fails.
+
+---
+
+## 'build-object.pkl'
+
+Using the `sbm config` / `increment [major | minor | patch]` methods, we are interacting with a build-object.pkl configuration file.
+
+This looks like:
+
+```pkl
+uuid = "3003BECF-B8D2-4DB6-88AD-65B018724F5F"
+name = "sbm"
+types {
+    "binary"
+}
+versions {
+    release {
+        major = 1
+        minor = 1
+        patch = 8
+    }
+}
+compile {
+    use = false
+    arguments {  }
+}
+details = "Swift Package Manager utilities (manage build objects)"
+author = "Levi Ouwendijk"
+update = "https://raw.githubusercontent.com/leviouwendijk/swift-build-manager/master/build-object.pkl"
+```
+
+If you frequently pass flags or options on a project, you can set up the `compile` object:
+
+Enable it, and add an option:
+
+```pkl
+compile {
+    use = true
+    arguments { "--local" "--debug" }
+}
+```
+
+Running purely `sbm` will now first check the compile object for any flags, and override the plain command by re-initiating the build.
+
 
 ---
 
@@ -173,13 +237,6 @@ sbm app --sym-resources                   # just fix Resources symlink and exit
 * `--resources-bundle <NAME>` – override bundle name
 * `--sym-resources` – repair Resources symlink and exit
 * `--wizard` – step-by-step interactive inputs
-
----
-
-## Exit codes & errors
-
-* Build and package operations surface Swift tool errors; deploy and bundle steps emit rich, colorized messages.
-* All internal errors are typed (no `NSError`), with helpful failure reasons and suggestions.
 
 ---
 
