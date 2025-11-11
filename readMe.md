@@ -1,6 +1,6 @@
 # Swift Build Manager (`sbm`)
 
-`sbm` is a thin CLI over the **Executable** library for building Swift packages, deploying selected executables to a dedicated `$HOME/sbm-bin` folder, exporting libraries (module interfaces & artifacts), listing/removing deployed binaries, and (optionally) constructing `.app` bundles, and build version tracking.
+`sbm` is a thin CLI over the **Executable** library for building Swift packages, deploying selected executables to a dedicated `$HOME/sbm-bin` folder, exporting libraries (module interfaces & artifacts), listing/removing deployed binaries, constructing in-repo `.app` bundles with symlinking, and build version tracking.
 
 It simply runs Swift Package Manager under the hood.
 
