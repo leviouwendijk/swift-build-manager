@@ -112,3 +112,25 @@ compile {
 
 Running purely `sbm` will now first check the compile object for any flags, and override the plain command by re-initiating the build.
 
+Example:
+
+```bash
+$ sbm 
+Detected preconfigured build instructions, intercepting build commands.
+    (You provided no overriding flags or options).
+
+    Arguments found:
+    Invocation (simulated): sbm
+Building for production...
+[7/7] Linking sbm
+Build complete! (3.47s)
+compiled == release
+no compiled.pkl written
+
+Deploying sbm → /Users/leviouwendijk/sbm-bin
+/Users/leviouwendijk/sbm-bin/sbm exists — replacing...
+Binary replaced at /Users/leviouwendijk/sbm-bin/sbm
+Metadata written: /Users/leviouwendijk/sbm-bin/sbm.metadata
+
+        sbm is now an executable binary for swift-build-manager
+```
