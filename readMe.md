@@ -114,7 +114,7 @@ Running purely `sbm` will now first check the compile object for any flags, and 
 
 Example:
 
-```bash
+```
 $ sbm 
 Detected preconfigured build instructions, intercepting build commands.
     (You provided no overriding flags or options).
