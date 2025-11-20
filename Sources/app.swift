@@ -15,6 +15,7 @@ struct SBM: AsyncParsableCommand {
             Build.self,
             Lib.self,
             RenewRepositories.self,
+            KillSwiftPM.self,
 
             // move/
             Remove.self,
