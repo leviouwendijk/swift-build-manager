@@ -7,7 +7,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "12b6a9c5ad12bf134c4bf2e53ce2072205c5be28"
+        "revision" : "48f0393d896565f829c5cfa0440bc91ac8a0fc63"
       }
     },
     {
@@ -34,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/plate.git",
       "state" : {
         "branch" : "master",
-        "revision" : "b9d863868e33d522b4fc44a5d9647ac61413b14c"
+        "revision" : "e3e2c18eafceae1d413a6c9c28dac3d2187d9d3c"
       }
     },
     {
