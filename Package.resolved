@@ -7,7 +7,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "badfc78dc007d2133af936ef5f23bc5dfce788ac"
+        "revision" : "12b6a9c5ad12bf134c4bf2e53ce2072205c5be28"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "4b6335bffdae50de59a52845a4a1993d28a15230"
+        "revision" : "f89c7c51ab4f102dbeb9df5af0636b3424f0dc99"
       }
     },
     {
@@ -34,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/plate.git",
       "state" : {
         "branch" : "master",
-        "revision" : "45d0de6c57bc81bb35147f1bad95bbd45cac3e4f"
+        "revision" : "b9d863868e33d522b4fc44a5d9647ac61413b14c"
       }
     },
     {
