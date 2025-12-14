@@ -92,7 +92,7 @@ struct Config: AsyncParsableCommand {
                 print("Detected remote build-object URL:")
                 print("  \(update)")
             } catch {
-                print("note: could not auto-detect remote build-object URL: \(error)")
+                print("note: could not auto-detect remote build-object URL: \(error.localizedDescription)")
             }
 
             let cfg = BuildObjectConfiguration(
