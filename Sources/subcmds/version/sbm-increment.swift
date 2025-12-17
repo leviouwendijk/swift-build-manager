@@ -1,5 +1,6 @@
 import Foundation
 import ArgumentParser
+import Version
 import plate
 
 enum BumpTarget: String, ExpressibleByArgument { case release, compiled }
