@@ -1,5 +1,5 @@
 {
-  "originHash" : "3ec9827c1f2a8c76128e3152190d256237c8ed361b30064575cb99857dfc83e4",
+  "originHash" : "a8d98843718ffd6010b129c3182d3c450f5de2982930c8055814a0b8a22827f7",
   "pins" : [
     {
       "identity" : "executable",
@@ -7,16 +7,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "644afa194eb85dcf4a3552e064b995f925c68f95"
-      }
-    },
-    {
-      "identity" : "extensions",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/leviouwendijk/Extensions.git",
-      "state" : {
-        "branch" : "master",
-        "revision" : "2670525e08c06638511e3b6a58093efbcc0d78f3"
+        "revision" : "d19ab0c524c25b04491ba49187ffeff3eb9754db"
       }
     },
     {
@@ -25,7 +16,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "7bc2dd192919fb8bc319725b6e9445dc84b42f29"
+        "revision" : "c12d63c70780a5274dadef5c3c9839e3a0aacdc1"
       }
     },
     {
@@ -34,16 +25,16 @@
       "location" : "https://github.com/leviouwendijk/plate.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e69d9dbd021ca2212939bd94fa781e84cbed8d9f"
+        "revision" : "19151fed4e81bef746554a55b6a353bbdf0129dd"
       }
     },
     {
-      "identity" : "structures",
+      "identity" : "primitives",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/leviouwendijk/Structures.git",
+      "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "1e32ad705aa4c84c2c680e61e8de2b18565470e6"
+        "revision" : "95d098547aa8c78b78613753163a1fa8bbbb6a1e"
       }
     },
     {
@@ -52,7 +43,16 @@
       "location" : "https://github.com/apple/swift-argument-parser.git",
       "state" : {
         "branch" : "main",
-        "revision" : "1fb5308335f6eba91aed9764525542a48780c428"
+        "revision" : "c5d11a805e765f52ba34ec7284bd4fcd6ba68615"
+      }
+    },
+    {
+      "identity" : "terminal",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Terminal.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "f71bcf025c0f480c775d9a4fdb6d3ea3db4b33cf"
       }
     }
   ],
