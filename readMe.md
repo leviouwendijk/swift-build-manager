@@ -1,5 +1,22 @@
 # Swift Build Manager (`sbm`)
 
+## Why
+
+Doing quick back-to-back builds, testing your targets, moving them around... Did I tire you yet?
+
+I just want the Swift compiler to build my target, and most of the time I want one of two things:
+1. to immediately execute it
+2. to keep it around and make an app bundle around it
+
+For immediate execution, I don't want to dig the path up through the .build/ directory. No, if I built `sbm` as a target, I just want to invoke it with `sbm`. Thus, `sbm` moves your targets (or your specified selected target(s)) into a `<home-dir>/sbm-bin/sbm*`. We add that to our shell path once. That way all your binaries (that you want to use) live there, and you can run them immediately. No thinking about build locations.
+
+For app bundles, you can just pass a --local flag, or (even handier) init a build-object.pkl configuration file (`sbm config init`) that will allow you to pass predefined args every time you execute sbm with no args. You can see an example below.
+
+It also has a very basic way to create a `<target>.app/` bundle, and a handy `sbm x` (executed) command, so that you can quickly make long-running lifecycle applications run directly from your terminal and your project. Again, no Xcode required--(yes, adding vim-mode was certainly very nice, but neovim exists.)
+
+
+## What is it
+
 `sbm` is a thin CLI over the **Executable** library for building Swift packages, deploying selected executables to a dedicated `$HOME/sbm-bin` folder, exporting libraries (module interfaces & artifacts), listing/removing deployed binaries, constructing in-repo `.app` bundles with symlinking, and build version tracking.
 
 It simply runs Swift Package Manager under the hood.
@@ -8,7 +25,7 @@ It simply runs Swift Package Manager under the hood.
 * Auto-overwrites on redeploy.
 * Writes a small sidecar metadata file per deployed binary.
 * Allows version tracking across builds.
-* Can build with confiruable flag and option overrides.
+* Can build with configurable flag and option overrides.
 
 ## Install & PATH
 
