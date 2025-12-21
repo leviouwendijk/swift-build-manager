@@ -14,6 +14,7 @@ let package = Package(
         .package(url: "https://github.com/leviouwendijk/Interfaces.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Executable.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Terminal.git", branch: "master"),
+        .package(url: "https://github.com/leviouwendijk/Indentation.git", branch: "master"),
     ],
     targets: [
         .executableTarget(
@@ -24,6 +25,7 @@ let package = Package(
                 .product(name: "Interfaces", package: "Interfaces"),
                 .product(name: "Executable", package: "Executable"),
                 .product(name: "Terminal", package: "Terminal"),
+                .product(name: "Indentation", package: "Indentation"),
             ],
             exclude: [
                 // "deprecated"

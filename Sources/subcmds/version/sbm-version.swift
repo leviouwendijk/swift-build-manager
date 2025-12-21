@@ -2,6 +2,7 @@ import Foundation
 import ArgumentParser
 import plate
 import Interfaces
+import Indentation
 
 struct Version: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
