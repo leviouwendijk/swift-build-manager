@@ -3,6 +3,7 @@ import plate
 import ArgumentParser
 import Executable
 import Indentation
+import Terminal
 
 struct Build: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -122,7 +123,7 @@ struct Build: AsyncParsableCommand {
 
                 // so that we can maintain persistence of argv
                 try await InvocationArgs.$argv.withValue(forwarded) {
-                    let cmd = try Build.parse(forwarded)
+                    let cmd = try await Build.parse(forwarded)
                     try await cmd.run()
                 }
                 
@@ -134,6 +135,51 @@ struct Build: AsyncParsableCommand {
         let destRoot = URL(fileURLWithPath: destination ?? defaultSBMBin())
         let mode: Executable.Build.Config.Mode = (debug ? .debug : .release)
         let config = Executable.Build.Config(mode: mode)
+
+        // ------------------------------------------
+        let selectedTargets = parseCSVish(targets)
+        let targetSummary = selectedTargets.isEmpty
+            ? "all executable targets"
+            : selectedTargets.joined(separator: ", ")
+
+        let sourceSummary = pklInvoked
+            ? "build-object.pkl"
+            : "direct invocation"
+
+        let banner = TerminalBlock(
+            title: "Building \(dirURL.lastPathComponent)",
+            fields: [
+                TerminalField("mode", config.buildDirComponent),
+                TerminalField("targets", targetSummary),
+                TerminalField("project", dirURL.path),
+                TerminalField("source", sourceSummary)
+            ],
+            theme: TerminalTheme(
+                title: .bold,
+                heading: .bold,
+                label: .init(.brightBlack),
+                value: .none,
+                caption: .init(.brightBlack),
+                success: .init(.green),
+                warning: .init(.yellow),
+                failure: .init(.red),
+                cursor: .bold,
+                disabled: .dim
+            ),
+            layout: TerminalBlockLayout(
+                fieldIndent: 4,
+                labelWidth: .fixed(7),
+                labelValueSpacing: 2,
+                blankLinesAfter: 0
+            )
+        )
+
+        print()
+        print(banner.render(stream: .standardOutput), terminator: "")
+        print()
+
+        fflush(stdout)
+        // ------------------------------------------
 
         _ = try await Executable.Build.build(at: dirURL, config: config, argv_audit: effectiveArgv)
 

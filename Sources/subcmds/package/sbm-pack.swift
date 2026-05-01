@@ -47,7 +47,7 @@ struct Pack: AsyncParsableCommand {
 
             if build {
                 // invoke defaults
-                let cmd = try Build.parse([])
+                let cmd = try await Build.parse([])
                 try await cmd.run()
             }
         }
