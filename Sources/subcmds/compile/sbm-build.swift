@@ -123,7 +123,8 @@ struct Build: AsyncParsableCommand {
 
                 // so that we can maintain persistence of argv
                 try await InvocationArgs.$argv.withValue(forwarded) {
-                    let cmd = try await Build.parse(forwarded)
+                    // let cmd = try await Build.parse(forwarded)
+                    let cmd = try Build.parse(forwarded)
                     try await cmd.run()
                 }
                 

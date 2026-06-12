@@ -11,6 +11,15 @@
       }
     },
     {
+      "identity" : "arguments",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Arguments.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "a4317bd7d254b68f66a63f54d159a87f157b3a0e"
+      }
+    },
+    {
       "identity" : "difference",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/leviouwendijk/Difference",
@@ -25,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "b0a28ed4444a41469d79f228b91dc5fca0448c0d"
+        "revision" : "663160081d74cea2a7a5ce8cb067c77e7a448de8"
       }
     },
     {
@@ -52,7 +61,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e266a15df2039b627b2da2a23fd1f5a3dd232c07"
+        "revision" : "273ef1e8319070f35c97c4a3040b97387e020d49"
       }
     },
     {
@@ -97,7 +106,7 @@
       "location" : "https://github.com/leviouwendijk/Position.git",
       "state" : {
         "branch" : "master",
-        "revision" : "70fd78230c3452d9a4471222d64324a2c084351d"
+        "revision" : "c80214283130c1bd4fc1c54dd5f3c574e3e4986c"
       }
     },
     {
@@ -106,7 +115,7 @@
       "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e112f25245dde3fcc2b87f746a7c090cbe8d2a3b"
+        "revision" : "1682a0cf9c3e921cf08b0fb22beea88013763a32"
       }
     },
     {
@@ -133,7 +142,7 @@
       "location" : "https://github.com/apple/swift-argument-parser.git",
       "state" : {
         "branch" : "main",
-        "revision" : "a544331c431f0e7aabbd2b3a50fee2e43c6526e6"
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382"
       }
     },
     {
@@ -143,6 +152,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "0a55bdc55ce07514cf9dc772edef4fa27cbdb2d6"
+      }
+    },
+    {
+      "identity" : "testflows",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/TestFlows.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "79b1af3ebd1fe834f2bd0b68642e55f25a261428"
       }
     },
     {
