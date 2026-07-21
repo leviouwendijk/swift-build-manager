@@ -1,69 +1,90 @@
-import Foundation
 import ArgumentParser
 import Executable
+import Foundation
 import plate
 
 struct KillSwiftPM: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "kill-swiftpm",
         abstract: "Inspect and kill running Swift/SwiftPM processes.",
-        aliases: ["kill", "killswift"]
+        aliases: [
+            "kill",
+            "killswift"
+        ]
     )
 
     @Option(
-        name: [.customShort("r"), .long],
-        help: "Working directory used for process listing (defaults to current working directory)."
+        name: [
+            .customShort("r"),
+            .long
+        ],
+        help: "Working directory retained for command compatibility."
     )
     var root: String?
 
     @Flag(
         name: .long,
-        help: "Use SIGKILL instead of SIGTERM."
+        help: "Use SIGKILL immediately instead of attempting SIGTERM first."
     )
     var force: Bool = false
 
     @Flag(
         name: .long,
-        help: "Dry run: only list what would be killed, without sending any signals."
+        help: "Only show the processes that would be terminated."
     )
     var dryRun: Bool = false
 
     func run() async throws {
-        let fm = FileManager.default
-        let rootPath = root ?? fm.currentDirectoryPath
-        let expandedRootPath = (rootPath as NSString).expandingTildeInPath
-        let cwdURL = URL(fileURLWithPath: expandedRootPath, isDirectory: true)
+        let rootPath = (
+            root ?? FileManager.default.currentDirectoryPath
+        ) as NSString
+
+        let expandedRootPath = rootPath.expandingTildeInPath
+        let cwdURL = URL(
+            fileURLWithPath: expandedRootPath,
+            isDirectory: true
+        )
 
         print("KillSwiftPM".ansi(.bold))
-        print("Root: \(expandedRootPath)".ansi(.brightBlack))
-        print("Force: \(force ? "ON".ansi(.yellow) : "off".ansi(.brightBlack))")
-        print("Dry run: \(dryRun ? "ON".ansi(.yellow) : "off".ansi(.brightBlack))")
+        print(
+            "Root: \(expandedRootPath)".ansi(.brightBlack)
+        )
+        print(
+            "Force: " +
+            (
+                force
+                    ? "ON".ansi(.yellow)
+                    : "off".ansi(.brightBlack)
+            )
+        )
+        print(
+            "Dry run: " +
+            (
+                dryRun
+                    ? "ON".ansi(.yellow)
+                    : "off".ansi(.brightBlack)
+            )
+        )
         print()
 
         let manager = SwiftPMProcesses()
-        let processes = try await manager.list(cwd: cwdURL)
 
-        if processes.isEmpty {
-            print("No Swift/SwiftPM processes detected.".ansi(.green))
+        let processes = try await manager.killAll(
+            force: force,
+            dryRun: dryRun,
+            cwd: cwdURL
+        )
+
+        guard !processes.isEmpty else {
             return
         }
-
-        print("Detected \(processes.count) Swift/SwiftPM processes:\n".ansi(.brightBlack))
-        for p in processes {
-            print("• pid \(p.pid)".ansi(.brightBlack) + " – " + p.commandLine.ansi(.bold))
-        }
-        print()
 
         if dryRun {
-            print("Dry run enabled; no signals will be sent.".ansi(.yellow))
             print()
-            _ = try await manager.killAll(force: force, dryRun: true, cwd: cwdURL)
-            return
+            print(
+                "Dry run enabled; no signals were sent."
+                    .ansi(.yellow)
+            )
         }
-
-        print("Sending signals…".ansi(.brightBlack))
-        print()
-
-        _ = try await manager.killAll(force: force, dryRun: false, cwd: cwdURL)
     }
 }
