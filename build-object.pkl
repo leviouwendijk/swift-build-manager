@@ -5,14 +5,14 @@ types {
 }
 versions {
     release {
-        major = 1
-        minor = 1
-        patch = 14
+        major = 2
+        minor = 0
+        patch = 0
     }
 }
 compile {
-    use = false
-    arguments {  }
+    use = true
+    arguments { "--products" "sbm" }
 }
 details = "Swift Package Manager utilities (manage build objects)"
 author = "Levi Ouwendijk"

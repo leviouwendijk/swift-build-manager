@@ -1,39 +1,8 @@
-import ArgumentParser
-import Foundation
+import Executable
 
 @main
-struct SBM: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
-        commandName: "sbm",
-        abstract: "Swift Build Manager (thin CLI over Executable library).",
-        subcommands: [
-            // app-bundle/
-            AppContent.self,
-            AppExec.self,
-
-            // build/
-            Build.self,
-            Lib.self,
-            RenewRepositories.self,
-            KillSwiftPM.self,
-
-            // move/
-            Remove.self,
-            BinList.self,
-            Setup.self,
-
-            // package/
-            Clean.self,
-            Pack.self,
-            
-            // version/
-            Config.self,
-            Increment.self,
-            Update.self,
-            Modernize.self,
-            Version.self,
-            Remote.self
-        ],
-        defaultSubcommand: Build.self
-    )
+enum SBM {
+    static func main() async {
+        await SwiftBuildManagerCommand.main()
+    }
 }

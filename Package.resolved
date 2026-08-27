@@ -1,5 +1,5 @@
 {
-  "originHash" : "cbcb3713e883914121e4697b3777db4a6831453de692fdc91278d003a7f31e68",
+  "originHash" : "acaff0d24ed74b5f92be2c2b554042a9b8f55bf9789813922d26eaa3b4dcd01c",
   "pins" : [
     {
       "identity" : "ansi",
@@ -34,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "3f5e911c071fd1d8504574ea3836c65efbd3aab2"
+        "revision" : "fb7c714b2b0b6c4cf5b4272dce866e7f612e9ef7"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "a93746d05fa8ee1ad0b3734f123bc7ea764f1c57"
+        "revision" : "0072526e1095f100b239e75ee4732a4491297989"
       }
     },
     {
@@ -70,7 +70,7 @@
       "location" : "https://github.com/leviouwendijk/IO.git",
       "state" : {
         "branch" : "master",
-        "revision" : "11fffb1fa112fd87d8487110695e18ea5db95a5c"
+        "revision" : "52271833d4af8750eddc444148dcf7c187f8ad40"
       }
     },
     {
@@ -124,7 +124,7 @@
       "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "6c87b862779cca1371d975c33068ddf363e0fe3f"
+        "revision" : "7992ebc66ba098758e574befc1b869978b38e82c"
       }
     },
     {
@@ -155,15 +155,6 @@
       }
     },
     {
-      "identity" : "swift-argument-parser",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-argument-parser.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "25fa69e8eab18c6034e7a050edf96dbf9a0490f4"
-      }
-    },
-    {
       "identity" : "swift-subprocess",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-subprocess.git",
@@ -187,7 +178,7 @@
       "location" : "https://github.com/leviouwendijk/Terminal.git",
       "state" : {
         "branch" : "master",
-        "revision" : "af946e84246b2faa768099043ce1372da4bbd461"
+        "revision" : "cc0917d387d78dec543959dbef05f13e76b1f7b5"
       }
     },
     {
