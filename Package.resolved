@@ -34,7 +34,7 @@
       "location" : "https://github.com/leviouwendijk/DSL",
       "state" : {
         "branch" : "master",
-        "revision" : "9efff74e61ff3679fce19f3cbf6df09c3bc23691"
+        "revision" : "30ec6798f883b91f697d060bb001e0e4f7a09225"
       }
     },
     {
@@ -43,7 +43,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "45ccd7795d8364e4ddcf3c81f2bfacd02d453822"
+        "revision" : "28bda797ca5779cf31bc3b8c4ebc6718b73a844c"
       }
     },
     {
@@ -133,7 +133,7 @@
       "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "7b53326bba4229c0b8c62529dfe0934f6ddedf6c"
+        "revision" : "3b9e65785ecb8aa493c55893f61619b6967ce10d"
       }
     },
     {
@@ -187,7 +187,7 @@
       "location" : "https://github.com/leviouwendijk/Terminal.git",
       "state" : {
         "branch" : "master",
-        "revision" : "01e62b4821a772bb8676326f381c70e332f2c14f"
+        "revision" : "ef6faf11fdedbc727f22f5a6c5e908caaed32459"
       }
     },
     {
