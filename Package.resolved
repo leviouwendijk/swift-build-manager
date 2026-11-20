@@ -70,7 +70,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e64fcbaac9f9dec16fb557506b4946261682a0a1"
+        "revision" : "cb6cc0888c21a99a436b52fcd87966b5a8b63de0"
       }
     },
     {
@@ -376,7 +376,7 @@
       "location" : "https://github.com/leviouwendijk/Writers.git",
       "state" : {
         "branch" : "master",
-        "revision" : "3da92b9e3ceb3608f57f7de4896db4d5d385d4f9"
+        "revision" : "0b035b4ce663740e1b7cf08ed120f86dff51f5ad"
       }
     }
   ],
