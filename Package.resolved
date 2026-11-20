@@ -1,5 +1,5 @@
 {
-  "originHash" : "acaff0d24ed74b5f92be2c2b554042a9b8f55bf9789813922d26eaa3b4dcd01c",
+  "originHash" : "4876f25257e4ae61eff383a459503e9c9bf1c809e3e7891a6c91b4696d6b892c",
   "pins" : [
     {
       "identity" : "ansi",
@@ -70,7 +70,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "75955eed488921506796e8a2bfcb59437555a1d3"
+        "revision" : "d432476969fbc98eeb206b09b870d23749e25b52"
       }
     },
     {
@@ -205,7 +205,7 @@
       "location" : "https://github.com/leviouwendijk/Path.git",
       "state" : {
         "branch" : "master",
-        "revision" : "3ad6bcbfc000566cb37deff48d97adc93d2c94b3"
+        "revision" : "51d13fcd2cab1b1d420b9fadaef5d5f7a2c1191b"
       }
     },
     {

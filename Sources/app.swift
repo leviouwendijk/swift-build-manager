@@ -1,8 +1,8 @@
-import Executable
+import ExecutableLegacy
 
 @main
 enum SBM {
     static func main() async {
-        await SwiftBuildManagerCommand.main()
+        await SwiftBuildManagerMigrationCommand.main()
     }
 }

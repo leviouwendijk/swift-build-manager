@@ -29,6 +29,10 @@ let package = Package(
                     name: "Executable",
                     package: "Executable"
                 ),
+                .product(
+                    name: "ExecutableLegacy",
+                    package: "Executable"
+                ),
             ]
         ),
     ]
