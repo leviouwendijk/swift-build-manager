@@ -10,7 +10,7 @@ I just want the Swift compiler to build my target, and most of the time I want o
 
 For immediate execution, I don't want to dig the path up through the .build/ directory. No, if I built `sbm` as a target, I just want to invoke it with `sbm`. Thus, `sbm` moves your targets (or your specified selected target(s)) into a `<home-dir>/sbm-bin/sbm*`. We add that to our shell path once. That way all your binaries (that you want to use) live there, and you can run them immediately. No thinking about build locations.
 
-For app bundles, you can just pass a --local flag, or (even handier) init a build-object.pkl configuration file (`sbm config init`) that will allow you to pass predefined args every time you execute sbm with no args. You can see an example below.
+For app bundles, you can just pass a --local flag, or (even handier) describe the package once in a `package.frame` beside `Package.swift` (`sbm config init` writes one), so a flagless `sbm` builds and deploys the way you want. You can see examples below.
 
 It also has a very basic way to create a `<target>.app/` bundle, and a handy `sbm x` (executed) command, so that you can quickly make long-running lifecycle applications run directly from your terminal and your project. Again, no Xcode required--(yes, adding vim-mode was certainly very nice, but neovim exists.)
 
@@ -43,111 +43,83 @@ export PATH="$HOME/sbm-bin:$PATH"
 
 ## Commands
 
-`sbm` is subcommand-based. The default subcommand is **build**.
+`sbm` is subcommand-based. The default subcommand is **build**: a bare `sbm` builds the package you are in.
 
 ```text
-$ sbm --help
-OVERVIEW: Swift Build Manager (thin CLI over Executable library).
-
-USAGE: sbm <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  app                     Create/refresh a .app bundle wired to .build.
-  x                       Try to execute the app bundle in this project.
-  build (default)         Build a Swift package (debug/release) and optionally
-                          deploy to '~/sbm-bin/'.
-  lib                     Build library with module interfaces and export artifacts.
-  remove                  Remove deployed binary and its metadata.
-  list                    List binaries in sbm-bin.
-  setup                   Setup the sbm-bin directory
-  clean                   swift package clean
-  pack                    SwiftPM dependency operations (update/resolve).
-  config                  Manage build-object.pkl
-  increment               Increment the project version
-  update                  Update and rebuild the current repo
-  modernize               Upgrade legacy build-object.pkl to the new schema
-  version                 Show current versions (built vs repository) and repo
-                          divergence
-  remote                  Remote helpers (set||open)
-
-  See 'sbm help <subcommand>' for detailed help.
+build (default)   build; deploy what package.frame's .deploy names to ~/sbm-bin
+test              run the Tests/ package's products (debug)
+bench             run the Benchmarks/ package's products (release)
+clean             swift package clean
+wipe              delete .build and .index-build (all, main, extra; -r below a root)
+wipe caches -y    purge SwiftPM's global cache
+keep              packages whose caches wipe leaves alone (.config/sbm/keep.frame)
+pack              swift package update (-b then builds, -t tests)
+version           release tag, HEAD, and what each deployed product was built from
+increment         tag HEAD with the next release (major | minor | patch) and push it
+release           tag an exact release version
+config init       write package.frame (and Tests/package.frame)
+modernize         migrate a legacy build-object.pkl to package.frame
+list / remove     binaries in ~/sbm-bin
+app / x           .app bundles wired to .build
+lib               export a library's module interfaces and artifacts
 ```
 
-`sbm` will write a compiled version to the compiled.pkl.
-
-`sbm` building auto-appends the compiled.pkl to the .gitignore if they aren't found.
-
-This is intended for update tracking with easy CLI incrementing.
-
-Local versions are kept purely written from builds, while the remote build-object is authoritative.
-
-That ensures that compiled version != build-object release version when the build fails.
+See `sbm <subcommand> --help` for the flags.
 
 ---
 
-## 'build-object.pkl'
+## package.frame
 
-Using the `sbm config` / `increment [major | minor | patch]` methods, we are interacting with a build-object.pkl configuration file.
+Every package sbm works with has a `package.frame` beside its `Package.swift`. Its binding says what the package is.
 
-This looks like:
+```frame
+import Executable;
 
-```pkl
-uuid = "3003BECF-B8D2-4DB6-88AD-65B018724F5F"
-name = "sbm"
-types {
-    "binary"
-}
-versions {
-    release {
-        major = 1
-        minor = 1
-        patch = 8
-    }
-}
-compile {
-    use = false
-    arguments {  }
-}
-details = "Swift Package Manager utilities (manage build objects)"
-author = "Levi Ouwendijk"
-update = "https://raw.githubusercontent.com/leviouwendijk/swift-build-manager/master/build-object.pkl"
+let package: Package = .{
+    .build = .{ .arguments = ["--skip-products", "tool_debug"] },
+    .deploy = .{ .products = ["tool"] },
+    .wipe = .{ .above = .gigabytes(4) },
+};
 ```
 
-If you frequently pass flags or options on a project, you can set up the `compile` object:
+- A flagless `sbm` builds with `.build.arguments` and deploys the `.deploy` products. Without `.deploy`, nothing is deployed. A library is `let package: Package = .{};`.
+- Build flags you pass yourself (`-d`, `--products`, `-l`, …) replace package.frame for that run. `-t`, `-b`, `--bench` and the tidy flags below don't: `sbm -t` still builds and deploys as package.frame says.
+- Tests and benchmarks are nested packages, `Tests/` and `Benchmarks/`, each with its own `package.frame`: `let tests: Tests = .{ .primary = "t_tool" };`, `let benchmarks: Benchmarks = .{ … };`.
 
-Enable it, and add an option:
+## Versions
 
-```pkl
-compile {
-    use = true
-    arguments { "--local" "--debug" }
-}
+Releases are git tags (`1.2.3`). `sbm increment patch` tags HEAD with the next one and pushes it, and `sbm release 1.3.0` tags an exact one. Both refuse a dirty or unpushed HEAD. A deploy writes `~/sbm-bin/<product>.metadata` with the release, the commit and whether the tree was dirty, and `sbm version` compares them with the repository.
+
+## Around a build: tests, benchmarks, disk
+
+```text
+sbm -t                      run the tests first; a failure stops the build and deploy
+sbm --bench                 run the benchmarks after the build (no short form)
+sbm pack -b -t --bench      update, test, build, benchmark
+--clean / --wipe            after the command (on build, test, bench and pack)
+--clean-before / --wipe-before
 ```
 
-Running purely `sbm` will now first check the compile object for any flags, and override the plain command by re-initiating the build.
+`--wipe` deletes the `.build` and `.index-build` of the packages the command used. The build's root, plus `Tests/` with `-t` and `Benchmarks/` with `--bench`. A `.wipe = .{ .above = .gigabytes(4) }` in any package.frame does the same automatically after a successful run, once that package's caches grow past the size (`.kilobytes`, `.megabytes`, `.gigabytes`, `.terabytes`).
 
-Example:
+`sbm wipe` on its own:
 
+```text
+sbm wipe            the package with its Tests/ and Benchmarks/
+sbm wipe main       the package only
+sbm wipe extra      Tests/ and Benchmarks/ only (confirmed by their package.frame)
+  -r [root] [-d N]  every package below root
+  -n                dry run with sizes and a total
+  -y                no questions
+sbm wipe caches -y  SwiftPM's global cache
 ```
-$ sbm 
-Detected preconfigured build instructions, intercepting build commands.
-    (You provided no overriding flags or options).
 
-    Arguments found:
-    Invocation (simulated): sbm
-Building for production...
-[7/7] Linking sbm
-Build complete! (3.47s)
-compiled == release
-no compiled.pkl written
+Wipe never deletes under a running SwiftPM build, and skips what the keep list names:
 
-Deploying sbm → /Users/leviouwendijk/sbm-bin
-/Users/leviouwendijk/sbm-bin/sbm exists — replacing...
-Binary replaced at /Users/leviouwendijk/sbm-bin/sbm
-Metadata written: /Users/leviouwendijk/sbm-bin/sbm.metadata
+```frame
+import Executable;
 
-        sbm is now an executable binary for swift-build-manager
+let io: Keep = .{ .packages = ["~/code/IO"], .caches = ["build"], .reason = "slow rebuilds" };
 ```
+
+`sbm keep add [path]`, `sbm keep rm [name]`, `sbm keep check`, `sbm keep` (list). The file is `~/.config/sbm/keep.frame`. It is read from every configuration root.
