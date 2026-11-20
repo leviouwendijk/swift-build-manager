@@ -79,7 +79,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "bc185f7a06ded0589b0eda9a8c414cdee15e7586"
+        "revision" : "860529ea595f889846d4b4c84b55d2fd664a1cff"
       }
     },
     {
@@ -97,7 +97,7 @@
       "location" : "https://github.com/leviouwendijk/Frame.git",
       "state" : {
         "branch" : "master",
-        "revision" : "cf4288b7212d831d585c9097b3cb27d240424cce"
+        "revision" : "d3ac3b5a2f1302cf2c5784c30f299b88dba445b3"
       }
     },
     {
@@ -133,7 +133,7 @@
       "location" : "https://github.com/leviouwendijk/Interfaces.git",
       "state" : {
         "branch" : "master",
-        "revision" : "2c42873c8d202a505acfecac0acc4717e2385474"
+        "revision" : "eed24e26f1d5b3d88ec273c4eb5cdd7f926d1d99"
       }
     },
     {
@@ -196,7 +196,7 @@
       "location" : "https://github.com/leviouwendijk/Parsers.git",
       "state" : {
         "branch" : "master",
-        "revision" : "13b06fb7090e157bd5c269d26fa676eab94fecbb"
+        "revision" : "71946b149369d217504e31638aa35f0bc41a1164"
       }
     },
     {
@@ -394,7 +394,7 @@
       "location" : "https://github.com/leviouwendijk/Version.git",
       "state" : {
         "branch" : "master",
-        "revision" : "4da543f7bd6baa23ff51b98f140c636e6ef705a6"
+        "revision" : "d7c22f28bdfe241fa817787f00d398b0150b15d5"
       }
     },
     {
