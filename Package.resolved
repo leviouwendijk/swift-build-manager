@@ -70,7 +70,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "cb6cc0888c21a99a436b52fcd87966b5a8b63de0"
+        "revision" : "d5ea6f1c9e49bf1083f1062a3032cd62c1536c29"
       }
     },
     {
@@ -241,7 +241,7 @@
       "location" : "https://github.com/leviouwendijk/Processes.git",
       "state" : {
         "branch" : "master",
-        "revision" : "afd2286a7d01dbdf378d54474eb2065a69e2d979"
+        "revision" : "12ca3dcae6065f9e85ae83a0a3d150afbb6adf5c"
       }
     },
     {
@@ -350,6 +350,24 @@
       "state" : {
         "branch" : "master",
         "revision" : "cf4a02a5562df0b128b1f41c7b9563a227bc24db"
+      }
+    },
+    {
+      "identity" : "testflows",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/TestFlows.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "cce33b917f1bc5c4dd0536588a4aec4fe0832814"
+      }
+    },
+    {
+      "identity" : "testing",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/leviouwendijk/Testing.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "abe024a50cfbe3ebab5e538e023d30616a35d3a2"
       }
     },
     {
