@@ -61,7 +61,7 @@
       "location" : "https://github.com/leviouwendijk/Errors.git",
       "state" : {
         "branch" : "master",
-        "revision" : "3317793dc05c9ac49e6a543c1ec1aa224276d8e1"
+        "revision" : "66b044f9dbd2213b290d004aa9b19ab391ccf42e"
       }
     },
     {
@@ -79,7 +79,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "74733dd0e7f07c0e750dd55a195c2303e58de80e"
+        "revision" : "e8a116c3fd79f3cbb357b18c4b38c39dcedc4cef"
       }
     },
     {
@@ -97,7 +97,7 @@
       "location" : "https://github.com/leviouwendijk/Frame.git",
       "state" : {
         "branch" : "master",
-        "revision" : "569c27166013ed371a26c3562ea61bb04fac5339"
+        "revision" : "cf4288b7212d831d585c9097b3cb27d240424cce"
       }
     },
     {
@@ -205,7 +205,7 @@
       "location" : "https://github.com/leviouwendijk/Parsing.git",
       "state" : {
         "branch" : "master",
-        "revision" : "44366ece8a3390d0ef6b6abbbad5b545d04a11e6"
+        "revision" : "fd3f4869b1c4246954e89a410fbb71017242e2dd"
       }
     },
     {
