@@ -25,7 +25,7 @@
       "location" : "https://github.com/leviouwendijk/Atomos.git",
       "state" : {
         "branch" : "master",
-        "revision" : "d82fd2ccb56f9fafbb079435c4d70ff5207bfe8c"
+        "revision" : "857fa1b7d1975fe17d52e21c154f92ba5e696be3"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/leviouwendijk/Errors.git",
       "state" : {
         "branch" : "master",
-        "revision" : "66b044f9dbd2213b290d004aa9b19ab391ccf42e"
+        "revision" : "af4592f7389c1d43ef8d20155cd6da973b7e88b6"
       }
     },
     {
@@ -79,7 +79,7 @@
       "location" : "https://github.com/leviouwendijk/Executable.git",
       "state" : {
         "branch" : "master",
-        "revision" : "3a166c1995269de158fff0481b97039942818d2b"
+        "revision" : "59e7346a9e0442b181aa90439afff31a347e3904"
       }
     },
     {
@@ -142,7 +142,7 @@
       "location" : "https://github.com/leviouwendijk/IO.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e7b8b41721cad2458d8bbd01f8d4a5f38dcd44ef"
+        "revision" : "cf63165f317e8d0e2e3048475b8d68d05203d2d8"
       }
     },
     {
@@ -169,7 +169,7 @@
       "location" : "https://github.com/leviouwendijk/Matching.git",
       "state" : {
         "branch" : "master",
-        "revision" : "21f42b5f67c76dfb48d0d6a73e9171dad7c09a96"
+        "revision" : "3db5dd4af391017c3593642b1def87112168516f"
       }
     },
     {
@@ -241,7 +241,7 @@
       "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "1e381664d669a5769f3e634ddada47ade4305db1"
+        "revision" : "1e9c7defa2037e0b74be9e95d8e987442323d372"
       }
     },
     {
@@ -304,7 +304,7 @@
       "location" : "https://github.com/leviouwendijk/Search.git",
       "state" : {
         "branch" : "master",
-        "revision" : "250c0d21a67ae5fdd42719592ca77121c2dd9743"
+        "revision" : "accb67567bd4586f924b68bc4dc870e0543ee370"
       }
     },
     {
@@ -403,7 +403,7 @@
       "location" : "https://github.com/leviouwendijk/Writers.git",
       "state" : {
         "branch" : "master",
-        "revision" : "0b035b4ce663740e1b7cf08ed120f86dff51f5ad"
+        "revision" : "ee0442ad2e581b73a7f97758b400f33a2f65f613"
       }
     }
   ],
